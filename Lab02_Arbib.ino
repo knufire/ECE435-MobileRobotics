@@ -1,4 +1,4 @@
-/*&StateMachine.ino
+/*StateMachine.ino
   Author: Carlotta. A. Berry
   Date: December 3, 2016
   This program will provide a template for an example of implementing a behavior-based control architecture
@@ -34,26 +34,17 @@
 #include <MultiStepper.h>//include multiple stepper motor library
 #include <NewPing.h> //include sonar library
 #include <TimerOne.h>
+#include "PinDefinitions.ino"
 
 //define stepper motor pin numbers
-const int rtStepPin = 50; //right stepper motor step pin
-const int rtDirPin = 51;  // right stepper motor direction pin
-const int ltStepPin = 52; //left stepper motor step pin
-const int ltDirPin = 53;  //left stepper motor direction pin
 
-const int greenLED = 6;
-const int redLED = 7;
-
-AccelStepper stepperRight(AccelStepper::DRIVER, rtStepPin, rtDirPin);//create instance of right stepper motor object (2 driver pins, low to high transition step pin 52, direction input pin 53 (high means forward)
-AccelStepper stepperLeft(AccelStepper::DRIVER, ltStepPin, ltDirPin);//create instance of left stepper motor object (2 driver pins, step pin 50, direction input pin 51)
+AccelStepper stepperRight(AccelStepper::DRIVER, PIN_RT_STEP, PIN_RT_DIR);//create instance of right stepper motor object (2 driver pins, low to high transition step pin 52, direction input pin 53 (high means forward)
+AccelStepper stepperLeft(AccelStepper::DRIVER, PIN_LT_STEP, PIN_LT_DIR);//create instance of left stepper motor object (2 driver pins, step pin 50, direction input pin 51)
 MultiStepper steppers;//create instance to control multiple steppers at the same time
 
 //define stepper motor constants
-#define stepperEnable 48    //stepper enable pin on stepStick
-#define enableLED 13 //stepper enabled LED
 #define stepperEnTrue false //variable for enabling stepper motor
 #define stepperEnFalse true //variable for disabling stepper motor
-#define test_led 13 //test led to test interrupt heartbeat
 
 #define robot_spd 800 //set robot speed
 #define max_accel 5000//maximum robot acceleration
@@ -68,16 +59,8 @@ MultiStepper steppers;//create instance to control multiple steppers at the same
 #define five_rotation 4000    //stepper rotation 3 rotations
 
 
-#define irFront   A7    //front IR analog pin
-#define irRear    A9    //back IR analog pin
-#define irRight   A10   //right IR analog pin
-#define irLeft    A11   //left IR analog pin
-#define snrLeft   A12   //front left sonar
-#define snrRight  A13  //front right sonar
-#define button    A15    //pushbutton
-
-NewPing sonarLt(snrLeft, snrLeft);    //create an instance of the left sonar
-NewPing sonarRt(snrRight, snrRight);  //create an instance of the right sonar
+NewPing sonarLt(PIN_SNR_LEFT, PIN_SNR_LEFT);    //create an instance of the left sonar
+NewPing sonarRt(PIN_SNR_RIGHT, PIN_SNR_RIGHT);  //create an instance of the right sonar
 
 #define irThresh    5 // The IR threshold for presence of an obstacle
 #define snrThresh   5   // The sonar threshold for presence of an obstacle
@@ -142,7 +125,7 @@ volatile byte state = 0;   //state to hold robot states and motor motion
 #define wander  4
 
 //define layers of subsumption architecture that are active
-byte layers = 1; //[wander runAway collide]
+byte layers = 2; //[wander runAway collide]
 //bit definitions for layers
 #define cLayer 0
 #define rLayer 1
@@ -153,18 +136,18 @@ byte layers = 1; //[wander runAway collide]
 void setup()
 {
   //stepper Motor set up
-  pinMode(rtStepPin, OUTPUT);//sets pin as outputr
-  pinMode(rtDirPin, OUTPUT);//sets pin as output
-  pinMode(ltStepPin, OUTPUT);//sets pin as output
-  pinMode(ltDirPin, OUTPUT);//sets pin as output
-  pinMode(stepperEnable, OUTPUT);//sets pin as output
-  pinMode(greenLED, OUTPUT);
-  pinMode(redLED, OUTPUT);
-  digitalWrite(stepperEnable, stepperEnFalse);//turns off the stepper motor driver
-  pinMode(enableLED, OUTPUT);//set LED as output
-  digitalWrite(enableLED, HIGH);//turn off enable LED
-  digitalWrite(greenLED, HIGH);
-  digitalWrite(redLED, HIGH);
+  pinMode(PIN_RT_STEP, OUTPUT);//sets pin as outputr
+  pinMode(PIN_RT_DIR, OUTPUT);//sets pin as output
+  pinMode(PIN_LT_STEP, OUTPUT);//sets pin as output
+  pinMode(PIN_LT_DIR, OUTPUT);//sets pin as output
+  pinMode(PIN_STEP_ENABLE, OUTPUT);//sets pin as output
+  pinMode(PIN_GREEN_LED, OUTPUT);
+  pinMode(PIN_RED_LED, OUTPUT);
+  digitalWrite(PIN_STEP_ENABLE, HIGH);//turns on the stepper motor driver
+  pinMode(PIN_LED_ENABLE, OUTPUT);//set LED as output
+  digitalWrite(PIN_LED_ENABLE, HIGH);//turn off enable LED
+  digitalWrite(PIN_GREEN_LED, HIGH);
+  digitalWrite(PIN_RED_LED, HIGH);
   stepperRight.setMaxSpeed(max_spd);//set the maximum permitted speed limited by processor and clock speed, no greater than 4000 steps/sec on Arduino
   stepperRight.setAcceleration(max_accel);//set desired acceleration in steps/s^2
   stepperLeft.setMaxSpeed(max_spd);//set the maximum permitted speed limited by processor and clock speed, no greater than 4000 steps/sec on Arduino
@@ -175,8 +158,8 @@ void setup()
 
   steppers.addStepper(stepperRight);//add right motor to MultiStepper
   steppers.addStepper(stepperLeft);//add left motor to MultiStepper
-  digitalWrite(stepperEnable, stepperEnTrue);//turns on the stepper motor driver
-  digitalWrite(enableLED, HIGH);//turn on enable LED
+
+  digitalWrite(PIN_LED_ENABLE, HIGH);//turn on enable LED
   //Timer Interrupt Set Up
   Timer1.initialize(timer_int);         // initialize timer1, and set a period in microseconds
   Timer1.attachInterrupt(updateSensors);  // attaches updateSensors() as a timer overflow interrupt
@@ -202,7 +185,7 @@ void updateSensors() {
   //test_state = !test_state;//LED to test the heartbeat of the timer interrupt routine
   //digitalWrite(enableLED, test_state);  // Toggles the LED to let you know the timer is working
   test_state = !test_state;
-  digitalWrite(test_led, test_state);
+  digitalWrite(PIN_LED_TEST, test_state);
   flag = 0;       //clear all sensor flags
   state = 0;      //clear all state flags
   updateIR();     //update IR readings and update flag variable and state machine
@@ -218,10 +201,10 @@ void updateSensors() {
 
 void updateIR() {
   int front, back, left, right;
-  front = analogRead(irFront);
-  back = analogRead(irRear);
-  left = analogRead(irLeft);
-  right = analogRead(irRight);
+  front = analogRead(PIN_IR_FRONT);
+  back = analogRead(PIN_IR_REAR);
+  left = analogRead(PIN_IR_LEFT);
+  right = analogRead(PIN_IR_RIGHT);
   irFrontAvg = (1280 / ((float)front + 18)) - 0.5;
   irRearAvg = (1100 / ((float)back + 16));
   irLeftAvg = (3000 / ((float)left + 22)) - 2;
@@ -366,11 +349,11 @@ void robotMotion() {
     float angleInRad = atan2(obstacleY, obstacleX);
     float angleInDeg = angleInRad / PI * 180;
     if (mult == 1) {
-        digitalWrite(greenLED, HIGH);
-        digitalWrite(redLED, LOW);
+        digitalWrite(PIN_GREEN_LED, HIGH);
+        digitalWrite(PIN_RED_LED, LOW);
       } else {
-        digitalWrite(greenLED, LOW);
-        digitalWrite(redLED, HIGH);
+        digitalWrite(PIN_GREEN_LED, LOW);
+        digitalWrite(PIN_RED_LED, HIGH);
     }
     goToAngle(angleInDeg + robotAngle);
     forward(half_rotation * mult);
@@ -412,11 +395,11 @@ void robotMotion() {
   //    Serial.print("\t OY: ");
   //    Serial.println(obstacleY);
       if (multiplier == 1) {
-        digitalWrite(greenLED, HIGH);
-        digitalWrite(redLED, LOW);
+        digitalWrite(PIN_GREEN_LED, HIGH);
+        digitalWrite(PIN_RED_LED, LOW);
       } else {
-        digitalWrite(greenLED, LOW);
-        digitalWrite(redLED, HIGH);
+        digitalWrite(PIN_GREEN_LED, LOW);
+        digitalWrite(PIN_RED_LED, HIGH);
       }
       float angleInRad = atan2(obstacleY, obstacleX);
       float angleInDeg = angleInRad / PI * 180;
