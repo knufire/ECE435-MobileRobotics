@@ -167,10 +167,10 @@ void robotMotion() {
 			obstacleY--;
 			mult = 4;
 		}
-		//    Serial.print("OX: ");
-		//    Serial.print(obstacleX);
-		//    Serial.print("\t OY: ");
-		//    Serial.println(obstacleY);
+//		Serial.print("OX: ");
+//		Serial.print(obstacleX);
+//		Serial.print("\t OY: ");
+//		Serial.println(obstacleY);
 		float angleInRad = atan2(obstacleY, obstacleX);
 		float angleInDeg = angleInRad / PI * 180;
 		if (mult == 1) {
@@ -215,10 +215,10 @@ void robotMotion() {
 				obstacleY--;
 				multiplier = 2;
 			}
-			//    Serial.print("OX: ");
-			//    Serial.print(obstacleX);
-			//    Serial.print("\t OY: ");
-			//    Serial.println(obstacleY);
+//			Serial.print("OX: ");
+//			Serial.print(obstacleX);
+//			Serial.print("\t OY: ");
+//			Serial.println(obstacleY);
 			if (multiplier == 1) {
 				digitalWrite(PIN_GREEN_LED, HIGH);
 				digitalWrite(PIN_RED_LED, LOW);

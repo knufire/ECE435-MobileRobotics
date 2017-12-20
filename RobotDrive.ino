@@ -49,19 +49,19 @@ void forward(int rot) {
 	positions[1] = stepperLeft.currentPosition() + rot;   //left motor absolute position
 	stepperRight.move(positions[0]);  //move right motor to position
 	stepperLeft.move(positions[1]);   //move left motor to position
-	Serial.print("Going forward: ");
-	Serial.println(rot);
+//	Serial.print("Going forward: ");
+//	Serial.println(rot);
 	runToStop();//run until the robot reaches the target
 	float dx = cos(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
 	float dy = sin(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
 	robotX = robotX + dx;
 	robotY = robotY + dy;
-	Serial.print("Robot X: ");
-	Serial.print(robotX);
-	Serial.print("\t Robot Y: ");
-	Serial.print(robotY);
-	Serial.print("\t Robot T: ");
-	Serial.println(robotAngle);
+//	Serial.print("Robot X: ");
+//	Serial.print(robotX);
+//	Serial.print("\t Robot Y: ");
+//	Serial.print(robotY);
+//	Serial.print("\t Robot T: ");
+//	Serial.println(robotAngle);
 }
 
 void stop() {
@@ -80,9 +80,9 @@ void goToAngle(float degrees) {
 	while(dAngle < -180){
 		dAngle = dAngle + 360;
 	}
-	//  Serial.print("delta Angle: ");
-	//  Serial.print(dAngle);
-	//  Serial.print("\n");
+//	Serial.print("delta Angle: ");
+//	Serial.print(dAngle);
+//	Serial.print("\n");
 	long numSteps = dAngle * CONST_SPIN_DEGREES_TO_STEPS;
 	stepperRight.move(numSteps);
 	stepperLeft.move(numSteps * -1);
