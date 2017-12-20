@@ -6,6 +6,8 @@
  *  by name instead of by pin number
  * */
 
+#pragma once
+
 /*------------------------Digital IO---------------------------------*/
 //		Name		   Pin #	Description
 #define PIN_RT_STEP		50 		//right stepper motor step pin

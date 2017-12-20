@@ -6,24 +6,13 @@
  *  by name instead of by pin number
  * */
 
-#define robot_spd 800 //set robot speed
-#define max_accel 5000//maximum robot acceleration
-#define max_spd 1000//maximum robot speed
-
-#define quarter_rotation 200  //stepper quarter rotation
-#define half_rotation 400     //stepper half rotation
-#define one_rotation  800     //stepper motor runs in 1/4 steps so 800 steps is one full rotation
-#define two_rotation  1600    //stepper motor 2 rotations
-#define three_rotation 2400   //stepper rotation 3 rotations
-#define four_rotation 3200    //stepper rotation 3 rotations
-#define five_rotation 4000    //stepper rotation 3 rotations
-
-#define CONST_FEET_TO_STEPS 912.2
-#define CONST_SPIN_DEGREES_TO_STEPS 5.35
+#include <AccelStepper.h>//include the stepper motor library
+#include <MultiStepper.h>//include multiple stepper motor library
+#include "RobotDrive.h"
 
 float robotX = 0;
 float robotY = 0;
-int robotAngle = 0;
+float robotAngle = 0;
 
 AccelStepper stepperRight(AccelStepper::DRIVER, PIN_RT_STEP, PIN_RT_DIR);//create instance of right stepper motor object (2 driver pins, low to high transition step pin 52, direction input pin 53 (high means forward)
 AccelStepper stepperLeft(AccelStepper::DRIVER, PIN_LT_STEP, PIN_LT_DIR);//create instance of left stepper motor object (2 driver pins, step pin 50, direction input pin 51)

@@ -6,26 +6,29 @@
  *  by name instead of by pin number
  * */
 
+#include "IRSensor.h"
+#include <NewPing.h>
+
 #define irThresh    5 // The IR threshold for presence of an obstacle
+#define minThresh 	0
 
 int irFrontArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 front IR readings
 int irRearArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 back IR readings
 int irRightArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 right IR readings
 int irLeftArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 left IR readings
-float irFrontAvg;  //variable to hold average of current front IR reading
-float irLeftAvg;   //variable to hold average of current left IR reading
-float irRearAvg;   //variable to hold average of current rear IR reading
-float irRightAvg;   //variable to hold average of current right IR reading
 int irIdx = 0;//index for 5 IR readings to take the average
-
-//flag byte to hold sensor data
-volatile byte irFlag = 0;    // Flag to hold IR & Sonar data - used to create the state machine
 
 //bit definitions for sensor data flag byte
 #define obFront   0 // Front IR trip
 #define obRear    1 // Rear IR trip
 #define obRight   2 // Right IR trip
 #define obLeft    3 // Left IR trip
+
+float irFrontAvg = 0;
+float irLeftAvg = 0;
+float irRearAvg = 0;
+float irRightAvg = 0;
+volatile byte irFlag = 0;
 
 void updateIR() {
 	int front, back, left, right;

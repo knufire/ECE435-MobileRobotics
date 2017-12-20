@@ -30,40 +30,19 @@
   Button      A15
  */
 
-#include <AccelStepper.h>//include the stepper motor library
-#include <MultiStepper.h>//include multiple stepper motor library
-#include <NewPing.h> //include sonar library
 #include <TimerOne.h>
-#include "PinDefinitions.ino"
-#include "RobotDrive.ino"
+#include "RobotDrive.h"
+#include "IRSensor.h"
+#include "PinDefinitions.h"
+#include "SonarSensor.h"
 
-NewPing sonarLt(PIN_SNR_LEFT, PIN_SNR_LEFT);    //create an instance of the left sonar
-NewPing sonarRt(PIN_SNR_RIGHT, PIN_SNR_RIGHT);  //create an instance of the right sonar
-
-
-#define snrThresh   5   // The sonar threshold for presence of an obstacle
-#define minThresh   0   // The sonar minimum threshold to filter out noise
 #define stopThresh  150 // If the robot has been stopped for this threshold move
 #define baud_rate 9600//set serial communication baud rate
 
-int srLeftArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 left sonar readings
-int srRightArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 right sonar readings
-int srIdx = 0;//index for 5 sonar readings to take the average
-unsigned int srLeft;   //variable to hold average of left sonar current reading
-unsigned int srRight;  //variable to hold average or right sonar current reading
-float srLeftAvg;  //variable to holde left sonar data
-float srRightAvg; //variable to hold right sonar data
-
 volatile boolean test_state; //variable to hold test led state for timer interrupt
-
-
-
-
 
 int goalX = 5;
 int goalY = 2;
-
-
 
 //flag byte to hold sensor data
 volatile byte flag = 0;    // Flag to hold IR & Sonar data - used to create the state machine
@@ -143,94 +122,6 @@ void updateSensors() {
 }
 
 /*
-   This is a sample updateIR() function, the description and code should be updated to take an average, consider all sensor and reflect
-   the necesary changes for the lab requirements.
- */
-
-void updateIR() {
-	int front, back, left, right;
-	front = analogRead(PIN_IR_FRONT);
-	back = analogRead(PIN_IR_REAR);
-	left = analogRead(PIN_IR_LEFT);
-	right = analogRead(PIN_IR_RIGHT);
-	irFrontAvg = (1280 / ((float)front + 18)) - 0.5;
-	irRearAvg = (1100 / ((float)back + 16));
-	irLeftAvg = (3000 / ((float)left + 22)) - 2;
-	irRightAvg = (1950 / ((float)right - 34));
-
-	if (irRightAvg < 0) irRightAvg = irThresh + 1;
-
-	//  print IR data
-	//  Serial.println("frontIR\tbackIR\tleftIR\trightIR");
-	//  Serial.print(front); Serial.print("\t");
-	//  Serial.print(back); Serial.print("\t");
-	//  Serial.print(left); Serial.print("\t");
-	//  Serial.println(right);
-	if (irRightAvg < irThresh && !bitRead(flag, obRight)) {
-		Serial.print("set right obstacle bit");
-		Serial.println(irRightAvg);
-		bitSet(flag, obRight);//set the right obstacle
-	}
-	else {
-		bitClear(flag, obRight);//clear the right obstacle
-	}
-	if (irLeftAvg < irThresh && !bitRead(flag, obLeft)) {
-		Serial.print("set left obstacle bit");
-		Serial.println(irLeftAvg);
-		bitSet(flag, obLeft);//set the left obstacle
-	}
-	else {
-		bitClear(flag, obLeft);//clear the left obstacle
-	}
-	if (irFrontAvg < irThresh && !bitRead(flag, obFront)) {
-		Serial.print("set front obstacle bit");
-		Serial.println(irFrontAvg);
-		bitSet(flag, obFront);//set the front obstacle
-	}
-	else {
-		bitClear(flag, obFront);//clear the front obstacle
-	}
-	if (irRearAvg < irThresh && !bitRead(flag, obRear)) {
-		Serial.print("set back obstacle bit");
-		Serial.println(irRearAvg);
-		bitSet(flag, obRear);//set the back obstacle
-	}
-	else {
-		bitClear(flag, obRear);//clear the back obstacle
-	}
-}
-
-/*
-  This is a sample updateSonar2() function, the description and code should be updated to take an average, consider all sensors and reflect
-  the necesary changes for the lab requirements.
- */
-void updateSonar() {
-	srRight =  sonarRt.ping_in(); //right sonara in inches
-	srLeft = sonarLt.ping_in(); //left sonar in inches
-	srRightAvg = srRight;
-	srLeftAvg = srLeft;
-
-	//  Serial.print("lt snr:\t");
-	//  Serial.print(srLeftAvg);
-	//  Serial.print("rt snr:\t");
-	//  Serial.println(srRightAvg);
-	if (srRightAvg < snrThresh && srRightAvg > minThresh) {
-		//    Serial.println("set front right obstacle bit");
-		bitSet(flag, obFRight);//set the front right obstacle
-	}
-	else {
-		bitClear(flag, obFRight);//clear the front right obstacle
-	}
-	if (srLeftAvg < snrThresh && srLeftAvg > minThresh) {
-		//    Serial.println("set front left obstacle bit");
-		bitSet(flag, obFLeft);//set the front left obstacle
-	}
-	else {
-		bitClear(flag, obFLeft);//clear the front left obstacle
-	}
-}
-
-/*
    This is a sample updateState() function, the description and code should be updated to reflect the actual state machine that you will implement
    based upon the the lab requirements.
  */
@@ -254,6 +145,7 @@ void updateState() {
    stop or change movement.
  */
 void robotMotion() {
+	flag = irFlag & snrFlag;
 	if (layers == 0) {
 		if ((flag & 0b1) || bitRead(state, collide)) { //check for a collide state
 			stop();
