@@ -25,24 +25,53 @@ int irIdx = 0;//index for 5 IR readings to take the average
 #define obRight   2 // Right IR trip
 #define obLeft    3 // Left IR trip
 
-float irFrontAvg = 0;
-float irLeftAvg = 0;
-float irRearAvg = 0;
-float irRightAvg = 0;
+float irFront = 0;
+float irLeft = 0;
+float irRear = 0;
+float irRight = 0;
 volatile byte irFlag = 0;
 
 void updateIR() {
-	int front, back, left, right;
+	int front, rear, left, right;
+
+	//Get all IR values
 	front = analogRead(PIN_IR_FRONT);
-	back = analogRead(PIN_IR_REAR);
+	rear = analogRead(PIN_IR_REAR);
 	left = analogRead(PIN_IR_LEFT);
 	right = analogRead(PIN_IR_RIGHT);
-	irFrontAvg = (1280 / ((float)front + 18)) - 0.5;
-	irRearAvg = (1100 / ((float)back + 16));
-	irLeftAvg = (3000 / ((float)left + 22)) - 2;
-	irRightAvg = (1950 / ((float)right - 34));
 
-	if (irRightAvg < 0) irRightAvg = irThresh + 1;
+	//Add IR values to array
+	irFrontArray[irIdx] = front;
+	irRearArray[irIdx] = rear;
+	irLeftArray[irIdx] = left;
+	irRightArray[irIdx] = right;
+
+	//Increment array index
+	irIdx++;
+	if (irIdx == 5) {
+		irIdx = 0;
+	}
+
+	//Find average of last 5 IR values
+	for (int i = 0; i < 5; i++) {
+		irFront += irFrontArray[i];
+		irLeft += irLeftArray[i];
+		irRear += irRearArray[i];
+		irRight += irRightArray[i];
+	}
+
+	irFront = irFront / 5;
+	irLeft = irLeft / 5;
+	irRear = irRear / 5;
+	irRight = irRight / 5;
+
+	//Convert IR values to inches
+	irFront = (1280 / (irFront + 18)) - 0.5;
+	irRear = (1100 / (irRear + 16));
+	irLeft = (3000 / (irLeft + 22)) - 2;
+	irRight = (1950 / (irRight - 34));
+
+	if (irRight < 0) irRight = irThresh + 1;
 
 	//  print IR data
 	//  Serial.println("frontIR\tbackIR\tleftIR\trightIR");
@@ -50,33 +79,33 @@ void updateIR() {
 	//  Serial.print(back); Serial.print("\t");
 	//  Serial.print(left); Serial.print("\t");
 	//  Serial.println(right);
-	if (irRightAvg < irThresh && !bitRead(irFlag, obRight)) {
+	if (irRight < irThresh && !bitRead(irFlag, obRight)) {
 		Serial.print("set right obstacle bit");
-		Serial.println(irRightAvg);
+		Serial.println(irRight);
 		bitSet(irFlag, obRight);//set the right obstacle
 	}
 	else {
 		bitClear(irFlag, obRight);//clear the right obstacle
 	}
-	if (irLeftAvg < irThresh && !bitRead(irFlag, obLeft)) {
+	if (irLeft < irThresh && !bitRead(irFlag, obLeft)) {
 		Serial.print("set left obstacle bit");
-		Serial.println(irLeftAvg);
+		Serial.println(irLeft);
 		bitSet(irFlag, obLeft);//set the left obstacle
 	}
 	else {
 		bitClear(irFlag, obLeft);//clear the left obstacle
 	}
-	if (irFrontAvg < irThresh && !bitRead(irFlag, obFront)) {
+	if (irFront < irThresh && !bitRead(irFlag, obFront)) {
 		Serial.print("set front obstacle bit");
-		Serial.println(irFrontAvg);
+		Serial.println(irFront);
 		bitSet(irFlag, obFront);//set the front obstacle
 	}
 	else {
 		bitClear(irFlag, obFront);//clear the front obstacle
 	}
-	if (irRearAvg < irThresh && !bitRead(irFlag, obRear)) {
+	if (irRear < irThresh && !bitRead(irFlag, obRear)) {
 		Serial.print("set back obstacle bit");
-		Serial.println(irRearAvg);
+		Serial.println(irRear);
 		bitSet(irFlag, obRear);//set the back obstacle
 	}
 	else {
