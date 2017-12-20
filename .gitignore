@@ -3,3 +3,5 @@
 .project
 sloeber.ino.cpp
 /.settings
+-E.d
+-E
