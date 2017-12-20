@@ -35,6 +35,9 @@ void driveSetup() {
 	pinMode(PIN_RT_DIR, OUTPUT);//sets pin as output
 	pinMode(PIN_LT_STEP, OUTPUT);//sets pin as output
 	pinMode(PIN_LT_DIR, OUTPUT);//sets pin as output
+	pinMode(PIN_STEP_ENABLE, OUTPUT);//sets pin as output
+
+	digitalWrite(PIN_STEP_ENABLE, HIGH);//turns on the stepper motor driver
 
 	stepperRight.setMaxSpeed(max_spd);//set the maximum permitted speed limited by processor and clock speed, no greater than 4000 steps/sec on Arduino
 	stepperRight.setAcceleration(max_accel);//set desired acceleration in steps/s^2

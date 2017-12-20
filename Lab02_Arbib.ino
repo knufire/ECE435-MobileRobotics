@@ -37,35 +37,14 @@
 #include "PinDefinitions.ino"
 #include "RobotDrive.ino"
 
-//define stepper motor pin numbers
-
-
-
-//define stepper motor constants
-#define stepperEnTrue false //variable for enabling stepper motor
-#define stepperEnFalse true //variable for disabling stepper motor
-
-
-
-
 NewPing sonarLt(PIN_SNR_LEFT, PIN_SNR_LEFT);    //create an instance of the left sonar
 NewPing sonarRt(PIN_SNR_RIGHT, PIN_SNR_RIGHT);  //create an instance of the right sonar
 
-#define irThresh    5 // The IR threshold for presence of an obstacle
+
 #define snrThresh   5   // The sonar threshold for presence of an obstacle
 #define minThresh   0   // The sonar minimum threshold to filter out noise
 #define stopThresh  150 // If the robot has been stopped for this threshold move
 #define baud_rate 9600//set serial communication baud rate
-
-int irFrontArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 front IR readings
-int irRearArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 back IR readings
-int irRightArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 right IR readings
-int irLeftArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 left IR readings
-float irFrontAvg;  //variable to hold average of current front IR reading
-float irLeftAvg;   //variable to hold average of current left IR reading
-float irRearAvg;   //variable to hold average of current rear IR reading
-float irRightAvg;   //variable to hold average of current right IR reading
-int irIdx = 0;//index for 5 IR readings to take the average
 
 int srLeftArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 left sonar readings
 int srRightArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 right sonar readings
@@ -122,15 +101,13 @@ byte layers = 2; //[wander runAway collide]
 void setup()
 {
 	driveSetup();
-	pinMode(PIN_STEP_ENABLE, OUTPUT);//sets pin as output
+
 	pinMode(PIN_GREEN_LED, OUTPUT);
 	pinMode(PIN_RED_LED, OUTPUT);
-	digitalWrite(PIN_STEP_ENABLE, HIGH);//turns on the stepper motor driver
 	pinMode(PIN_LED_ENABLE, OUTPUT);//set LED as output
 	digitalWrite(PIN_LED_ENABLE, HIGH);//turn off enable LED
 	digitalWrite(PIN_GREEN_LED, HIGH);
 	digitalWrite(PIN_RED_LED, HIGH);
-	digitalWrite(PIN_LED_ENABLE, HIGH);//turn on enable LED
 	//Timer Interrupt Set Up
 	Timer1.initialize(timer_int);         // initialize timer1, and set a period in microseconds
 	Timer1.attachInterrupt(updateSensors);  // attaches updateSensors() as a timer overflow interrupt
