@@ -10,6 +10,7 @@
 #define SONARSENSOR_H_
 
 #define snrThresh   5   // The sonar threshold for presence of an obstacle in inches
+#define minThresh 	0
 
 extern unsigned int srLeft;   //variable to hold the crrent left sonar reading
 extern unsigned int srRight;  //variable to hold the current right sonar reading

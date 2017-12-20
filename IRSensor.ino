@@ -10,9 +10,6 @@
 #include "IRSensor.h"
 #include <NewPing.h>
 
-#define irThresh    5 // The IR threshold for presence of an obstacle
-#define minThresh 	0
-
 int irFrontArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 front IR readings
 int irRearArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 back IR readings
 int irRightArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 right IR readings

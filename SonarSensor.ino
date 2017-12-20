@@ -8,6 +8,7 @@
  */
 
 #include "SonarSensor.h"
+#include <NewPing.h>
 
 NewPing sonarLt(PIN_SNR_LEFT, PIN_SNR_LEFT);    //create an instance of the left sonar
 NewPing sonarRt(PIN_SNR_RIGHT, PIN_SNR_RIGHT);  //create an instance of the right sonar
