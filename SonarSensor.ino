@@ -2,8 +2,9 @@
  * 	Author: Rahul Yarlagadda, Ellie Honious
  * 	Date: December 13th, 2017
  *
- * 	This file defines all hardware connections on the robot, so pin assignments can be refered to
- *  by name instead of by pin number
+ * 	This file contains the updateSonar() function, which will poll the sonar sensors and
+ * 	convert their readings to inches. A moving average filter is applied to the readings to
+ * 	reduce noise. The readings are available externally through the srLeft, srRight, and srFlag variables.
  */
 
 #include "SonarSensor.h"

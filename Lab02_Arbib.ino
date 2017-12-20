@@ -13,21 +13,6 @@
   bitRead(state, wander)) { // check if the wander state is active
   bitClear(state, wander);//clear the the wander state
   bitSet(state, wander);//set the wander state
-
-  Hardware Connections:
-  Stepper Enable          Pin 48
-  Right Stepper Step      Pin  46
-  Right Stepper Direction Pin 53
-  Left Stepper Step       Pin 44
-  Left Stepper Direction  Pin 49
-
-  Front IR    A8
-  Back IR     A9
-  Right IR    A10
-  Left IR     A11
-  Left Sonar  A12
-  Right Sonar A13
-  Button      A15
  */
 
 #include <TimerOne.h>
