@@ -4,7 +4,7 @@
  *
  * 	This file contains the updateSonar() function, which will poll the sonar sensors and
  * 	convert their readings to inches. A moving average filter is applied to the readings to
- * 	reduce noise. The readings are available externally through the srLeft, srRight, and srFlag variables.
+ * 	reduce noise. The readings are available externally through the snrLeft, snrRight, and srFlag variables.
  */
 
 #include "SonarSensor.h"
@@ -18,30 +18,41 @@ volatile byte snrFlag = 0;    // Flag to hold IR & Sonar data - used to create t
 #define obFLeft   4 // Left Sonar trip
 #define obFRight  5 // Right Sonar trip
 
-int srLeftArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 left sonar readings
-int srRightArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 right sonar readings
+unsigned int srLeftArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 left sonar readings
+unsigned int srRightArray[5] = {0, 0, 0, 0, 0}; //array to hold 5 right sonar readings
 int srIdx = 0;//index for 5 sonar readings to take the average
-int srLeftAvg;  //variable to holde left sonar data
-int srRightAvg; //variable to hold right sonar data
-int snrLeft;
-int snrRight;
+unsigned int srLeftAvg;  //variable to holde left sonar data
+unsigned int srRightAvg; //variable to hold right sonar data
+unsigned int snrLeft;
+unsigned int snrRight;
 
 
 
 /*
-  This is a sample updateSonar2() function, the description and code should be updated to take an average, consider all sensors and reflect
+  This is a sample updateSonar() function, the description and code should be updated to take an average, consider all sensors and reflect
   the necesary changes for the lab requirements.
  */
 void updateSonar() {
-	srRight =  sonarRt.ping_in(); //right sonara in inches
-	srLeft = sonarLt.ping_in(); //left sonar in inches
-	srRightAvg = srRight;
-	srLeftAvg = srLeft;
 
-	//  Serial.print("lt snr:\t");
-	//  Serial.print(srLeftAvg);
-	//  Serial.print("rt snr:\t");
-	//  Serial.println(srRightAvg);
+	snrRight =  sonarRt.ping(); //right sonar in uS
+	delay(50);
+	snrLeft = sonarLt.ping(); 	//left sonar in uS
+	delay(50);
+
+	Serial.println("Updating sonar...");
+
+
+	//TODO: Actually average snr values
+
+
+	srRightAvg = snrRight;
+	srLeftAvg = snrLeft;
+
+//	Serial.print("lt snr:\t");
+//	Serial.print(srLeftAvg);
+//	Serial.print("rt snr:\t");
+//	Serial.println(srRightAvg);
+
 	if (srRightAvg < snrThresh && srRightAvg > minThresh) {
 		//    Serial.println("set front right obstacle bit");
 		bitSet(snrFlag, obFRight);//set the front right obstacle
