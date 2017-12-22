@@ -10,6 +10,7 @@
 #include <AccelStepper.h>//include the stepper motor library
 #include <MultiStepper.h>//include multiple stepper motor library
 #include "RobotDrive.h"
+#include "PinDefinitions.h"
 
 float robotX = 0;
 float robotY = 0;
@@ -21,13 +22,15 @@ MultiStepper steppers;//create instance to control multiple steppers at the same
 
 void driveSetup() {
 	//stepper Motor set up
+	Serial.println("Setting up drive");
+
 	pinMode(PIN_RT_STEP, OUTPUT);//sets pin as outputr
 	pinMode(PIN_RT_DIR, OUTPUT);//sets pin as output
 	pinMode(PIN_LT_STEP, OUTPUT);//sets pin as output
 	pinMode(PIN_LT_DIR, OUTPUT);//sets pin as output
 	pinMode(PIN_STEP_ENABLE, OUTPUT);//sets pin as output
 
-	digitalWrite(PIN_STEP_ENABLE, HIGH);//turns on the stepper motor driver
+	digitalWrite(PIN_STEP_ENABLE, false);//turns on the stepper motor drivers
 
 	stepperRight.setMaxSpeed(max_spd);//set the maximum permitted speed limited by processor and clock speed, no greater than 4000 steps/sec on Arduino
 	stepperRight.setAcceleration(max_accel);//set desired acceleration in steps/s^2
@@ -39,6 +42,7 @@ void driveSetup() {
 
 	steppers.addStepper(stepperRight);//add right motor to MultiStepper
 	steppers.addStepper(stepperLeft);//add left motor to MultiStepper
+
 }
 
 void forward(int rot) {
