@@ -56,53 +56,51 @@ void updateIR() {
 		irRear += irRearArray[i];
 		irRight += irRightArray[i];
 	}
-
 	irFront = irFront / 5;
 	irLeft = irLeft / 5;
 	irRear = irRear / 5;
 	irRight = irRight / 5;
 
-	//Convert IR values to inches
+	//Convert IR values to inches based on calibration
 	irFront = (1280 / (irFront + 18)) - 0.5;
 	irRear = (1100 / (irRear + 16));
 	irLeft = (3000 / (irLeft + 22)) - 2;
 	irRight = (1950 / (irRight - 34));
 
-	if (irRight < 0) irRight = irThresh + 1;
 
 	//  print IR data
-	//  Serial.println("frontIR\tbackIR\tleftIR\trightIR");
-	//  Serial.print(front); Serial.print("\t");
-	//  Serial.print(back); Serial.print("\t");
-	//  Serial.print(left); Serial.print("\t");
-	//  Serial.println(right);
-	if (irRight < irThresh && !bitRead(irFlag, obRight)) {
-		Serial.print("set right obstacle bit");
-		Serial.println(irRight);
+//	  Serial.println("frontIR\tbackIR\tleftIR\trightIR");
+//	  Serial.print(front); Serial.print("\t");
+//	  Serial.print(rear); Serial.print("\t");
+//	  Serial.print(left); Serial.print("\t");
+//	  Serial.println(right);
+	if (irRight < irThresh) {
+//		Serial.print("set right obstacle bit");
+//		Serial.println(irRight);
 		bitSet(irFlag, obRight);//set the right obstacle
 	}
 	else {
 		bitClear(irFlag, obRight);//clear the right obstacle
 	}
-	if (irLeft < irThresh && !bitRead(irFlag, obLeft)) {
-		Serial.print("set left obstacle bit");
-		Serial.println(irLeft);
+	if (irLeft < irThresh) {
+//		Serial.print("set left obstacle bit");
+//		Serial.println(irLeft);
 		bitSet(irFlag, obLeft);//set the left obstacle
 	}
 	else {
 		bitClear(irFlag, obLeft);//clear the left obstacle
 	}
-	if (irFront < irThresh && !bitRead(irFlag, obFront)) {
-		Serial.print("set front obstacle bit");
-		Serial.println(irFront);
+	if (irFront < irThresh) {
+//		Serial.print("set front obstacle bit");
+//		Serial.println(irFront);
 		bitSet(irFlag, obFront);//set the front obstacle
 	}
 	else {
 		bitClear(irFlag, obFront);//clear the front obstacle
 	}
-	if (irRear < irThresh && !bitRead(irFlag, obRear)) {
-		Serial.print("set back obstacle bit");
-		Serial.println(irRear);
+	if (irRear < irThresh) {
+//		Serial.print("set back obstacle bit");
+//		Serial.println(irRear);
 		bitSet(irFlag, obRear);//set the back obstacle
 	}
 	else {
