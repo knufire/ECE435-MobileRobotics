@@ -2,7 +2,7 @@
  * 	Author: Rahul Yarlagadda, Ellie Honious
  * 	Date: December 13th, 2017
  *
- * 	This file contains the basic motor contorl and odeometry code for the robot. Basic functions for driving forward, reverse
+ * 	This file contains the basic motor control and odometry code for the robot. Basic functions for driving forward, reverse
  * 	and going to an angle are written. Additionally, the robot uses encoders to keep track of it's position and poise relative
  * 	to it's starting location.
  */
