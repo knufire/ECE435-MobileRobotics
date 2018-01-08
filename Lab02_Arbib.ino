@@ -54,36 +54,43 @@ volatile byte state = 0;   //state to hold robot states and motor motion
 #define wander  4
 
 //define layers of subsumption architecture that are active
-byte layers = 2; //[wander runAway collide]
+byte layers = 1; //[wander runAway collide]
+
 //bit definitions for layers
 #define cLayer 0
 #define rLayer 1
 #define wLayer 2
 
-#define timer_int 250000 // 1/2 second (500000 us) period for timer interrupt
+#define timer_int 250000 // 1/4 second (250000 us) period for timer interrupt
 
 void setup()
 {
+	//Serial setup
+	Serial.begin(baud_rate);				//start serial communication in order to debug the software while coding
+
+	//Drive Setup
 	driveSetup();
 
+	//LED Setup
 	pinMode(PIN_GREEN_LED, OUTPUT);
 	pinMode(PIN_RED_LED, OUTPUT);
-	pinMode(PIN_LED_ENABLE, OUTPUT);//set LED as output
-	digitalWrite(PIN_LED_ENABLE, HIGH);//turn off enable LED
+	pinMode(PIN_LED_ENABLE, OUTPUT);
+	digitalWrite(PIN_LED_ENABLE, HIGH);
 	digitalWrite(PIN_GREEN_LED, HIGH);
 	digitalWrite(PIN_RED_LED, HIGH);
+
+
 	//Timer Interrupt Set Up
-	Timer1.initialize(timer_int);         // initialize timer1, and set a period in microseconds
+	Timer1.initialize(timer_int);         	// initialize timer1, and set a period in microseconds
 	Timer1.attachInterrupt(updateSensors);  // attaches updateSensors() as a timer overflow interrupt
 
-	Serial.begin(baud_rate);//start serial communication in order to debug the software while coding
+
 	delay(3000);//wait 3 seconds before robot moves
 }
 
 void loop()
 {
 	robotMotion();  //execute robot motions based upon sensor data and current state
-	//delay(100);
 }
 
 
@@ -92,18 +99,13 @@ void loop()
   to meet the lab requirements.
  */
 void updateSensors() {
-	//  Serial.print("updateSensors\t");
-	//  Serial.println(test_state);
-	//test_state = !test_state;//LED to test the heartbeat of the timer interrupt routine
-	//digitalWrite(enableLED, test_state);  // Toggles the LED to let you know the timer is working
-	test_state = !test_state;
-	digitalWrite(PIN_LED_TEST, test_state);
-	flag = 0;       //clear all sensor flags
-	state = 0;      //clear all state flags
-	updateIR();     //update IR readings and update flag variable and state machine
-	//updateSonar();  //update Sonar readings and update flag variable and state machine
-	updateState();  //update State Machine based upon sensor readings
-	//delay(1000);     //added so that you can read the data on the serial monitor
+	test_state = !test_state;					//LED to test the heartbeat of the timer interrupt routine
+	digitalWrite(PIN_LED_TEST, test_state);		//Toggles the LED to let you know the timer is working
+	flag = 0;       	//clear all sensor flags
+	state = 0;      	//clear all state flags
+	updateIR();     	//update IR readings and update flag variable and state machine
+	updateSonar();  	//update Sonar readings and update flag variable and state machine
+	updateState();  	//update State Machine based upon sensor readings
 }
 
 /*
@@ -130,8 +132,9 @@ void updateState() {
    stop or change movement.
  */
 void robotMotion() {
-	flag = irFlag & snrFlag;
+	flag = irFlag ;
 	if (layers == 0) {
+//		Serial.println("-----------Aggressive Kids--------------");
 		if ((flag & 0b1) || bitRead(state, collide)) { //check for a collide state
 			stop();
 		}
@@ -139,41 +142,35 @@ void robotMotion() {
 			forward(quarter_rotation);//move forward as long as all sensors are clear
 		}
 	} else if (layers == 1) {
-		Serial.println("-----------Wander with obstacles--------------");
-		int randomAngle = random(0 ,360);
-		//Serial.println(randomAngle);
-		float obstacleX = cos(randomAngle * PI / 180);
-		float obstacleY = sin(randomAngle * PI / 180);
-		//    float obstacleX = 0;
-		//    float obstacleY = 0;
-		int mult = 1;
+//		Serial.println("-----------Wander with obstacles--------------");
+		float obstacleX = 0;
+		float obstacleY = 0;
 		if (bitRead(flag, obFront)) {
-			Serial.println("Front obstacle");
+//			Serial.println("Front obstacle");
 			obstacleX--;
-			mult = 4;
 		}
 		if (bitRead(flag, obRear)) {
-			Serial.println("Rear obstacle");
+//			Serial.println("Rear obstacle");
 			obstacleX++;
-			mult = 4;
 		}
 		if (bitRead(flag, obLeft)) {
-			Serial.println("Left obstacle");
+//			Serial.println("Left obstacle");
 			obstacleY++;
-			mult = 4;
 		}
 		if (bitRead(flag, obRight)) {
-			Serial.println("Right obstacle");
+//			Serial.println("Right obstacle");
 			obstacleY--;
-			mult = 4;
 		}
-//		Serial.print("OX: ");
-//		Serial.print(obstacleX);
-//		Serial.print("\t OY: ");
-//		Serial.println(obstacleY);
+		if (obstacleX == 0 && obstacleY == 0) {
+			int randomAngle = random(0 ,360);
+			obstacleX = cos(randomAngle * PI / 180);
+			obstacleY = sin(randomAngle * PI / 180);
+		}
+
 		float angleInRad = atan2(obstacleY, obstacleX);
 		float angleInDeg = angleInRad / PI * 180;
-		if (mult == 1) {
+
+		if (!flag) {
 			digitalWrite(PIN_GREEN_LED, HIGH);
 			digitalWrite(PIN_RED_LED, LOW);
 		} else {
@@ -181,13 +178,12 @@ void robotMotion() {
 			digitalWrite(PIN_RED_LED, HIGH);
 		}
 		goToAngle(angleInDeg + robotAngle);
-		forward(half_rotation * mult);
+		forward(half_rotation);
 	} else if (layers == 2) {
 		if (abs(robotX - goalX) < 0.2 && abs(robotY - goalY) < 0.2) {
-			stop();
+			layers = 1;
 		}
 		else {
-			//Serial.println(randomAngle);
 			float goalAngle = atan2((goalY-robotY),(goalX-robotX));
 			float robotRadAngle = robotAngle * PI / 180;
 			float dAngle = goalAngle - robotRadAngle;
@@ -195,30 +191,26 @@ void robotMotion() {
 			float obstacleY = sin(dAngle);
 			int multiplier = 1;
 			if (bitRead(flag, obFront)) {
-				Serial.println("Front obstacle");
+//				Serial.println("Front obstacle");
 				forward(-1 * half_rotation);
 				multiplier = 2;
 				obstacleX--;
 			}
 			if (bitRead(flag, obRear)) {
-				Serial.println("Rear obstacle");
+//				Serial.println("Rear obstacle");
 				multiplier = 2;
 				obstacleX++;
 			}
 			if (bitRead(flag, obLeft)) {
-				Serial.println("Left obstacle");
+//				Serial.println("Left obstacle");
 				multiplier = 2;
 				obstacleY++;
 			}
 			if (bitRead(flag, obRight)) {
-				Serial.println("Right obstacle");
+//				Serial.println("Right obstacle");
 				obstacleY--;
 				multiplier = 2;
 			}
-//			Serial.print("OX: ");
-//			Serial.print(obstacleX);
-//			Serial.print("\t OY: ");
-//			Serial.println(obstacleY);
 			if (multiplier == 1) {
 				digitalWrite(PIN_GREEN_LED, HIGH);
 				digitalWrite(PIN_RED_LED, LOW);

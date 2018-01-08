@@ -74,9 +74,9 @@ void stop() {
 }
 
 void goToAngle(float degrees) {
-	Serial.print("Going to Angle: ");
-	Serial.print(degrees);
-	Serial.print("\n");
+//	Serial.print("Going to Angle: ");
+//	Serial.print(degrees);
+//	Serial.print("\n");
 	float dAngle = degrees - robotAngle;
 	while(dAngle > 180){
 		dAngle = dAngle - 360;

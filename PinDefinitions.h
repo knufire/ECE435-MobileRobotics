@@ -22,7 +22,7 @@
 
 /*------------------------Analog IO---------------------------------*/
 //		Name		   Pin #	Description
-#define PIN_IR_FRONT   	A7    	//front IR analog pin
+#define PIN_IR_FRONT   	A8    	//front IR analog pin
 #define PIN_IR_REAR    	A9    	//back IR analog pin
 #define PIN_IR_RIGHT   	A10   	//right IR analog pin
 #define PIN_IR_LEFT    	A11   	//left IR analog pin

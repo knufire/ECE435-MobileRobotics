@@ -35,11 +35,9 @@ unsigned int snrRight;
 void updateSonar() {
 
 	snrRight =  sonarRt.ping(); //right sonar in uS
-	delay(50);
 	snrLeft = sonarLt.ping(); 	//left sonar in uS
-	delay(50);
 
-	Serial.println("Updating sonar...");
+//	Serial.println("Updating sonar...");
 
 
 	//TODO: Actually average snr values
@@ -48,10 +46,11 @@ void updateSonar() {
 	srRightAvg = snrRight;
 	srLeftAvg = snrLeft;
 
-//	Serial.print("lt snr:\t");
-//	Serial.print(srLeftAvg);
-//	Serial.print("rt snr:\t");
-//	Serial.println(srRightAvg);
+	Serial.print("lt snr:\t");
+	Serial.print(srLeftAvg);
+	Serial.print("\t");
+	Serial.print("rt snr:\t");
+	Serial.println(srRightAvg);
 
 	if (srRightAvg < snrThresh && srRightAvg > minThresh) {
 		//    Serial.println("set front right obstacle bit");
