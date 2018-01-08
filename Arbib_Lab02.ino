@@ -1,18 +1,10 @@
-/*StateMachine.ino
-  Author: Carlotta. A. Berry
-  Date: December 3, 2016
-  This program will provide a template for an example of implementing a behavior-based control architecture
-  for a mobile robot to implement obstacle avoidance and random wander. There are many ways to create a state machine
-  and this is just one. It is to help get you started and brainstorm ideas, you are not required to use it.
-  Feel free to create your own version of state machine.
-
-  The flag byte (8 bits) variable will hold the IR and sonar data [X X snrRight snrLeft irLeft irRight irRear irFront]
-  The state byte (8 bits) variable will hold the state information as well as motor motion [X X X wander runAway collide rev fwd]
-
-  Use the following functions to read, clear and set bits in the byte
-  bitRead(state, wander)) { // check if the wander state is active
-  bitClear(state, wander);//clear the the wander state
-  bitSet(state, wander);//set the wander state
+/*	Arbib_Lab02.ino
+ * 	Author: Rahul Yarlagadda, Ellie Honious
+ * 	Date: December 13th, 2017
+ *
+ * 	This file contains the main loop for Airbib accomplishing the tasks laid out in Lab 2.
+ * 	This includes aggressive kid behaviors, shy kid behaviors, random-wander, and go-to-goal
+ * 	functionality. Additionally, random-wander and go-to-goal have integrated obstacle avoidance.
  */
 
 #include <TimerOne.h>
