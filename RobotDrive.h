@@ -30,7 +30,10 @@ extern float robotAngle;
 
 void driveSetup();
 void forward();
+void pivot();
+void spin();
 void stop();
+void reverse();
 void goToAngle();
 void runToStop();
 

@@ -68,9 +68,66 @@ void forward(int rot) {
 //	Serial.println(robotAngle);
 }
 
+/*robot pivot function */
+void pivot(int rot, int dir) {
+  long positions[2];                                    // Array of desired stepper positions
+  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
+  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
+  if (dir > 0) {//pivot right
+    positions[0] = stepperRight.currentPosition();    //right motor absolute position
+    positions[1] = stepperLeft.currentPosition() + rot ; //left motor absolute position
+  }
+  else//pivot left
+  {
+    positions[0] = stepperRight.currentPosition() + rot ; //right motor absolute position
+    positions[1] = stepperLeft.currentPosition() ;     //left motor absolute position
+  }
+  stepperRight.move(positions[0]);    //move right motor to position
+  stepperLeft.move(positions[1]);     //move left motor to position
+  bitSet(state, movingL);             //move left wheel
+  bitSet(state, movingR);             //move right wheel
+  runToStop();                        //run until the robot reaches the target
+}
+
+/*robot spin function */
+void spin(int rot, int dir) {
+  long positions[2];                                    // Array of desired stepper positions
+  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
+  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
+  if (dir > 0) {//spin right
+    positions[0] = stepperRight.currentPosition() - rot; //right motor absolute position
+    positions[1] = stepperLeft.currentPosition() + rot; //left motor absolute position
+  }
+  else//spin left
+  {
+    positions[0] = stepperRight.currentPosition() + rot; //right motor absolute position
+    positions[1] = stepperLeft.currentPosition() - rot;  //left motor absolute position
+  }
+  stepperRight.move(positions[0]);    //move right motor to position
+  stepperLeft.move(positions[1]);     //move left motor to position
+  bitSet(state, movingL);             //move left wheel
+  bitSet(state, movingR);             //move right wheel
+  runToStop();                        //run until the robot reaches the target
+}
+
 void stop() {
 	stepperRight.stop();
 	stepperLeft.stop();
+}
+
+/*robot move reverse function */
+void reverse(int rot) {
+  long positions[2];                                    // Array of desired stepper positions
+  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
+  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
+  positions[0] = stepperRight.currentPosition() - rot;  //right motor absolute position
+  positions[1] = stepperLeft.currentPosition() - rot;   //left motor absolute position
+
+  stepperRight.move(positions[0]);    //move right motor to position
+  stepperLeft.move(positions[1]);     //move left motor to position
+  bitSet(state, movingL);             //move left wheel
+  bitSet(state, movingR);             //move right wheel
+  runToStop();                        //run until the robot reaches the target
 }
 
 void goToAngle(float degrees) {
