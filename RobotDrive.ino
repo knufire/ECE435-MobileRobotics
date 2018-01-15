@@ -84,8 +84,6 @@ void pivot(int rot, int dir) {
   }
   stepperRight.move(positions[0]);    //move right motor to position
   stepperLeft.move(positions[1]);     //move left motor to position
-  bitSet(state, movingL);             //move left wheel
-  bitSet(state, movingR);             //move right wheel
   runToStop();                        //run until the robot reaches the target
 }
 
@@ -105,8 +103,6 @@ void spin(int rot, int dir) {
   }
   stepperRight.move(positions[0]);    //move right motor to position
   stepperLeft.move(positions[1]);     //move left motor to position
-  bitSet(state, movingL);             //move left wheel
-  bitSet(state, movingR);             //move right wheel
   runToStop();                        //run until the robot reaches the target
 }
 
@@ -125,8 +121,6 @@ void reverse(int rot) {
 
   stepperRight.move(positions[0]);    //move right motor to position
   stepperLeft.move(positions[1]);     //move left motor to position
-  bitSet(state, movingL);             //move left wheel
-  bitSet(state, movingR);             //move right wheel
   runToStop();                        //run until the robot reaches the target
 }
 

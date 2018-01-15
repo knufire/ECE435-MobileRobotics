@@ -23,26 +23,26 @@ int irIdx = 0; //index for 5 IR readings to take the average
 #define obLeft    3 // Left IR trip
 
 //define sensor constants and variables
-#define irMin    150               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
-#define irMax    300               // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMin    4               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMax    6               // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
 
 //define error variables
-int li_curr;    //left ir current reading
-int ri_curr;    //right ir current reading
+float li_curr;    //left ir current reading
+float ri_curr;    //right ir current reading
 
-int li_cerror;    //left ir current error
-int ri_cerror;    //right ir current error
+float li_cerror;    //left ir current error
+float ri_cerror;    //right ir current error
 
-int li_perror;    //left ir previous error
-int ri_perror;    //right ir previous error
+float li_perror;    //left ir previous error
+float ri_perror;    //right ir previous error
 
-int li_derror;  //left ir delta error
-int ri_derror;  //right ir delta error
+float li_derror;  //left ir delta error
+float ri_derror;  //right ir delta error
 
-int left_derror; //difference between left front and back sensor, this may be useful for adjusting the turn angle
-int right_derror; //difference between right front and back sensor, this may be useful for adjusting the turn angle
+float left_derror; //difference between left front and back sensor, this may be useful for adjusting the turn angle
+float right_derror; //difference between right front and back sensor, this may be useful for adjusting the turn angle
 
-int derror; //difference between left and right error to center robot in the hallway
+float derror; //difference between left and right error to center robot in the hallway
 
 float irFront = 0;
 float irLeft = 0;
@@ -83,53 +83,60 @@ void updateIR() {
 	irRear = irRear / 5;
 	irRight = irRight / 5;
 
-//	//Convert IR values to inches based on calibration
-//	irFront = (1280 / (irFront + 18)) - 0.5;
-//	irRear = (1100 / (irRear + 16));
-//	irLeft = (3000 / (irLeft + 22)) - 2;
-//	irRight = (1950 / (irRight - 34));
+//	irFront = front;
+//	irRear = rear;
+//	irLeft = left;
+//	irRight = right;
+
+//	Convert IR values to inches based on calibration
+	irFront = (1280 / (irFront + 18)) - 0.5;
+	irRear = (1100 / (irRear + 16));
+	irLeft = (3000 / (irLeft + 22)) - 2;
+	irRight = (1950 / (irRight - 34));
 
 	//  print IR data
-//	  Serial.println("frontIR\tbackIR\tleftIR\trightIR");
-//	  Serial.print(front); Serial.print("\t");
-//	  Serial.print(rear); Serial.print("\t");
-//	  Serial.print(left); Serial.print("\t");
-//	  Serial.println(right);
+//	Serial.println("frontIR\tbackIR\tleftIR\trightIR");
+//	Serial.print(irFront); Serial.print("\t");
+//	Serial.print(irRear); Serial.print("\t");
+//	Serial.print(irLeft); Serial.print("\t");
+//	Serial.println(irRight);
 
 	//Set obstacle flags
-	if (right > irMin - 50) {
-		//Serial.println("\t\tset right obstacle");
-		bitSet(flag, obRight);            //set the right obstacle
+	if (irRight > irMin && irRight < irMax) {
+		if (!bitRead(flag, obRight)) {
+			Serial.print("\t\tset right obstacle: ");
+			Serial.println(irRight);
+			bitSet(flag, obRight);            //set the right obstacle
+		}
 	} else
 		bitClear(flag, obRight);          //clear the right obstacle
-
-	if (left > irMin - 50) {
-		//Serial.println("\t\tset left obstacle");
-		bitSet(flag, obLeft);             //set the left obstacle
+	if (irLeft > irMin && irLeft < irMax) {
+		if (!bitRead(flag, obLeft)) {
+			Serial.print("\t\tset left obstacle: ");
+			Serial.println(irLeft);
+			bitSet(flag, obLeft);             //set the left obstacle
+		}
 	} else
 		bitClear(flag, obLeft);           //clear the left obstacle
-
-	if (front > irMax - 50) {
-		//Serial.println("set front obstacle bit");
-		bitSet(flag, obFront);            //set the front obstacle
+	if (irFront < irMax && irFront > irMin) {
+		if (!bitRead(flag, obFront)) {
+			Serial.print("\t\tset front obstacle bit: ");
+			Serial.println(irFront);
+			bitSet(flag, obFront);            //set the front obstacle
+		}
 	} else {
 		bitClear(flag, obFront);          //clear the front obstacle
 	}
 
 	//Calculate error
-	ri_curr = right;             //log current sensor reading [right IR]
-	if ((ri_curr > irMax) | (ri_curr < irMin))
-		ri_cerror = irMax - ri_curr; //calculate current error (too far positive, too close negative)
-	else
-		ri_cerror = 0;              //set error to zero if robot is in dead band
+	ri_curr = irRight;             //log current sensor reading [right IR]
+	ri_cerror = 5 - ri_curr; //calculate current error (too far positive, too close negative)
+
 	ri_derror = ri_cerror - ri_perror; //calculate change in error
 	ri_perror = ri_cerror;    //log current error as previous error [left sonar]
 
-	li_curr = left;                   //log current sensor reading [left sonar]
-	if ((li_curr > irMax) | (li_curr < irMin))
-		li_cerror = irMax - li_curr;   //calculate current error
-	else
-		li_cerror = 0;                  //error is zero if in deadband
+	li_curr = irLeft;                   //log current sensor reading [left sonar]
+	li_cerror = 5 - li_curr;   //calculate current error
 	li_derror = li_cerror - li_perror; //calculate change in error
 	li_perror = li_cerror;                //log reading as previous error
 

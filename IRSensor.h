@@ -16,9 +16,9 @@ extern float irLeft;   //variable to hold average of current left IR reading
 extern float irRear;   //variable to hold average of current rear IR reading
 extern float irRight;   //variable to hold average of current right IR reading
 
-extern int li_cerror;    //left ir current error
-extern int ri_cerror;    //right ir current error
-extern int derror; //difference between left and right error to center robot in the hallway
+extern float li_cerror;    //left ir current error
+extern float ri_cerror;    //right ir current error
+extern float derror; //difference between left and right error to center robot in the hallway
 
 extern volatile byte irFlag;    // Flag to hold IR & Sonar data - used to create the state machine
 
