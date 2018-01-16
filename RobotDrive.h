@@ -36,5 +36,6 @@ void stop();
 void reverse();
 void goToAngle();
 void runToStop();
+void runAtSpeed(float leftSpeed, float rightSpeed);
 
 #endif /* ROBOTDRIVE_H_ */

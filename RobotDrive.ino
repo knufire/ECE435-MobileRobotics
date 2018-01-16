@@ -84,7 +84,7 @@ void pivot(int rot, int dir) {
   }
   stepperRight.move(positions[0]);    //move right motor to position
   stepperLeft.move(positions[1]);     //move left motor to position
-  runToStop();                        //run until the robot reaches the target
+  runToStop();                       //run until the robot reaches the target
 }
 
 /*robot spin function */
@@ -113,15 +113,7 @@ void stop() {
 
 /*robot move reverse function */
 void reverse(int rot) {
-  long positions[2];                                    // Array of desired stepper positions
-  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
-  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
-  positions[0] = stepperRight.currentPosition() - rot;  //right motor absolute position
-  positions[1] = stepperLeft.currentPosition() - rot;   //left motor absolute position
-
-  stepperRight.move(positions[0]);    //move right motor to position
-  stepperLeft.move(positions[1]);     //move left motor to position
-  runToStop();                        //run until the robot reaches the target
+	forward(-1*rot);
 }
 
 void goToAngle(float degrees) {
@@ -166,4 +158,12 @@ void runToStop ( void ) {
 			stop();
 		}
 	}
+}
+
+void runAtSpeed(float leftSpeed, float rightSpeed) {
+	stepperLeft.setSpeed(stepperLeft.currentPosition() + 1);
+	stepperRight.setSpeed(stepperRight.currentPosition() + 1);
+	stepperLeft.move(100);
+	stepperRight.move(100);
+	steppers.run();
 }

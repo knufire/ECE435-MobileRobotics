@@ -23,8 +23,8 @@ int irIdx = 0; //index for 5 IR readings to take the average
 #define obLeft    3 // Left IR trip
 
 //define sensor constants and variables
-#define irMin    4               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
-#define irMax    6               // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMin    3               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMax    10               // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
 
 //define error variables
 float li_curr;    //left ir current reading
@@ -131,12 +131,13 @@ void updateIR() {
 	//Calculate error
 	ri_curr = irRight;             //log current sensor reading [right IR]
 	ri_cerror = 5 - ri_curr; //calculate current error (too far positive, too close negative)
-
+	if (ri_cerror < 1 && ri_cerror > -1) ri_cerror = 0;
 	ri_derror = ri_cerror - ri_perror; //calculate change in error
 	ri_perror = ri_cerror;    //log current error as previous error [left sonar]
 
 	li_curr = irLeft;                   //log current sensor reading [left sonar]
 	li_cerror = 5 - li_curr;   //calculate current error
+	if (li_cerror < 1 && li_cerror > -1) li_cerror = 0;
 	li_derror = li_cerror - li_perror; //calculate change in error
 	li_perror = li_cerror;                //log reading as previous error
 

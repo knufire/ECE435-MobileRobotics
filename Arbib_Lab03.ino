@@ -75,9 +75,10 @@ void setup() {
 }
 
 void loop() {
-	wallBang(); //execute robot motions based upon sensor data and current state
-	delay(500);
+	updateState();  	//update State Machine based upon sensor readings
+	wallBang();
 }
+
 
 /*
  This is a sample wallBang() function, the description and code should be updated to reflect the actual robot motion function that you will implement
@@ -95,24 +96,27 @@ void wallBang() {
 	case (FOLLOW_RIGHT):
 		Serial.println("right wall found");
 		if (bitRead(flag, obFront)) { //check for a front wall before moving
+			/* THIS WORKS IF ri_cerror == 0*/
 			Serial.print("right wall: front corner ");
 			//make left turn if wall found
 			reverse(two_rotation);              //back up
 			spin(three_rotation, 0);              //turn left
 		}
 		if (ri_cerror == 0) {                 //no error, robot in deadband
+			/* THIS WORKS */
 			Serial.println("right wall detected, drive forward");
-			forward(quarter_rotation);            //move robot forward
+			forward(quarter_rotation);            //move robot forward. If i replace this with pivot, the robot starts freezing again (weird).
 		} else {
 			//Serial.println("rt wall: adjust turn angle based upon error");
+			/*THIS DOESN'T WORK*/
 			if (ri_cerror < 0) {          //negative error means too close
 				Serial.println("\trt wall: too close turn left");
 				pivot(quarter_rotation, 1);      //pivot left
 				pivot(quarter_rotation, 0);   //pivot right to straighten up
 			} else if (ri_cerror > 0) {     //positive error means too far
 				Serial.println("\trt wall: too far turn right");
-				pivot(quarter_rotation, 1);      //pivot right
-				pivot(quarter_rotation, 0);   //pivot left to straighten up
+				pivot(quarter_rotation, 1);      //pivot left
+				pivot(quarter_rotation, 0);   //pivot right to straighten up
 			}
 		}
 		break;
@@ -131,12 +135,12 @@ void wallBang() {
 			Serial.println("lt wall detected: adjust turn angle based upon error");
 			if (li_cerror < 0) { //negative error means too close
 				Serial.println("\tlt wall: too close turn right");
-				pivot(quarter_rotation, 1);      //pivot right
-				pivot(quarter_rotation, 0);   //pivot left
+				pivot(quarter_rotation, 1);      //pivot left
+				pivot(quarter_rotation, 0);   //pivot right to straighten up
 			} else if (li_cerror > 0) { //positive error means too far
 				Serial.println("\tlt wall: too far turn left");
 				pivot(quarter_rotation, 1);      //pivot left
-				pivot(quarter_rotation, 0);   //pivot right
+				pivot(quarter_rotation, 0);   //pivot right to straighten up
 			}
 		}
 		break;
@@ -175,7 +179,6 @@ void updateSensors() {
 	test_state = !test_state;//LED to test the heartbeat of the timer interrupt routine
 	digitalWrite(PIN_LED_TEST, test_state);	//Toggles the LED to let you know the timer is working
 	updateIR();  //update IR readings and update flag variable and state machine
-	updateState();  	//update State Machine based upon sensor readings
 	Serial.println("------------------------------");
 }
 
@@ -202,9 +205,9 @@ void updateState() {
 		Serial.println("\tset follow hallway state");
 		state = CENTER;
 	}
-	Serial.print("\t\tState: ");
-	Serial.println(state);
-	Serial.print("\t\tFlag: ");
-	Serial.println(flag);
+//	Serial.print("\t\tState: ");
+//	Serial.println(state);
+//	Serial.print("\t\tFlag: ");
+//	Serial.println(flag);
 }
 
