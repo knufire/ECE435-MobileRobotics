@@ -147,15 +147,16 @@ void goToAngle(float degrees) {
    then stop it
  */
 void runToStop ( void ) {
-	int runNow = 1;
-	while (runNow) {
-		if (!stepperRight.run() ) {
-			runNow = 0;
-			stop();
+	bool rightRunning = true;
+	bool leftRunning = true;
+	while (rightRunning || leftRunning) {
+		rightRunning = stepperRight.run();
+		leftRunning = stepperLeft.run();
+		if (!rightRunning) {
+			stepperRight.stop();
 		}
-		if (!stepperLeft.run()) {
-			runNow = 0;
-			stop();
+		if (!leftRunning) {
+			stepperLeft.stop();
 		}
 	}
 }
