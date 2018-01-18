@@ -131,8 +131,6 @@ void updateIR() {
 	//Calculate error
 	ri_curr = irRight;             //log current sensor reading [right IR]
 	ri_cerror = 5 - ri_curr; //calculate current error (too far positive, too close negative)
-//	Serial.print("ri_cerror\t");
-//	Serial.println(ri_cerror);
 	if (ri_cerror < 1 && ri_cerror > -1) ri_cerror = 0;
 	ri_derror = ri_cerror - ri_perror; //calculate change in error
 	ri_perror = ri_cerror;    //log current error as previous error [left sonar]
@@ -142,7 +140,6 @@ void updateIR() {
 	if (li_cerror < 1 && li_cerror > -1) li_cerror = 0;
 	li_derror = li_cerror - li_perror; //calculate change in error
 	li_perror = li_cerror;                //log reading as previous error
-
 }
 
 /*
