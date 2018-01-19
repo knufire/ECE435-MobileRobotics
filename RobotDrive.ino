@@ -91,10 +91,11 @@ void reverse(int rot) {
 	forward(-rot);
 }
 
+void spinDegrees(float degrees) {
+	goToAngle(degrees + robotAngle);
+}
+
 void goToAngle(float degrees) {
-//	Serial.print("Going to Angle: ");
-//	Serial.print(degrees);
-//	Serial.print("\n");
 	float dAngle = degrees - robotAngle;
 	while(dAngle > 180){
 		dAngle = dAngle - 360;
@@ -102,20 +103,18 @@ void goToAngle(float degrees) {
 	while(dAngle < -180){
 		dAngle = dAngle + 360;
 	}
-//	Serial.print("delta Angle: ");
-//	Serial.print(dAngle);
-//	Serial.print("\n");
 	long numSteps = dAngle * CONST_SPIN_DEGREES_TO_STEPS;
 	stepperRight.move(numSteps);
 	stepperLeft.move(numSteps * -1);
 	runToStop();
-	while (degrees < 0) {
-		degrees += 360;
-	}
-	while (degrees > 360) {
-		degrees -= 360;
-	}
-	robotAngle = degrees;
+	//TODO: Reimplement navigation
+//	while (degrees < 0) {
+//		degrees += 360;
+//	}
+//	while (degrees > 360) {
+//		degrees -= 360;
+//	}
+//	robotAngle = degrees;
 }
 
 /*This function, runToStop(), will run the robot until the target is achieved and
@@ -128,7 +127,6 @@ void runToStop ( void ) {
 void runAtSpeed(float leftSpeed, float rightSpeed) {
 	stepperLeft.setSpeed(leftSpeed);
 	stepperRight.setSpeed(rightSpeed);
-	stepperLeft.move(1);
-	stepperRight.move(1);
-	steppers.run();
+	stepperLeft.runSpeed();
+	stepperRight.runSpeed();
 }

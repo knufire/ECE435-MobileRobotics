@@ -9,7 +9,7 @@
 #ifndef ROBOTDRIVE_H_
 #define ROBOTDRIVE_H_
 
-#define robot_spd 	800 	//set robot speed
+#define robot_spd 	400 	//set robot speed
 #define max_accel 	5000	//maximum robot acceleration
 #define max_spd 	1000	//maximum robot speed
 
@@ -22,7 +22,7 @@
 #define five_rotation 		4000    //stepper rotation 3 rotations
 
 #define CONST_FEET_TO_STEPS 912.2
-#define CONST_SPIN_DEGREES_TO_STEPS 5.35
+#define CONST_SPIN_DEGREES_TO_STEPS 5.5
 
 extern float robotX;
 extern float robotY;
@@ -32,6 +32,7 @@ void driveSetup();
 void forward();
 void pivot();
 void spin();
+void spinDegrees(float degrees);
 void stop();
 void reverse();
 void goToAngle();

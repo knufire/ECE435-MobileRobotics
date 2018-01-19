@@ -10,10 +10,10 @@
 
 /*------------------------Digital IO---------------------------------*/
 //		Name		   Pin #	Description
-#define PIN_RT_STEP		50 		//right stepper motor step pin
-#define PIN_RT_DIR 		51 		//right stepper motor direction pin
-#define PIN_LT_STEP 	52		//left stepper motor step pin
-#define PIN_LT_DIR 		53		//left stepper motor direction pin
+#define PIN_LT_STEP		50 		//right stepper motor step pin
+#define PIN_LT_DIR 		51 		//right stepper motor direction pin
+#define PIN_RT_STEP 	52		//left stepper motor step pin
+#define PIN_RT_DIR 		53		//left stepper motor direction pin
 #define PIN_GREEN_LED 	6		//Green LED on the breadboard
 #define PIN_RED_LED 	7		//Red LED on the breadboard
 #define PIN_STEP_ENABLE	48		//Stepper enable pin
