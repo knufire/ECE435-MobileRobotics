@@ -23,8 +23,8 @@ int irIdx = 0; //index for 5 IR readings to take the average
 #define obLeft    3 // Left IR trip
 
 //define sensor constants and variables
-#define irMin    3               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
-#define irMax    10               // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMin    2               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMax    12               // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
 
 //define error variables
 float li_curr;    //left ir current reading
@@ -32,15 +32,6 @@ float ri_curr;    //right ir current reading
 
 float li_cerror;    //left ir current error
 float ri_cerror;    //right ir current error
-
-float li_perror;    //left ir previous error
-float ri_perror;    //right ir previous error
-
-float li_derror;  //left ir delta error
-float ri_derror;  //right ir delta error
-
-float left_derror; //difference between left front and back sensor, this may be useful for adjusting the turn angle
-float right_derror; //difference between right front and back sensor, this may be useful for adjusting the turn angle
 
 float derror; //difference between left and right error to center robot in the hallway
 
@@ -118,7 +109,7 @@ void updateIR() {
 		}
 	} else
 		bitClear(flag, obLeft);           //clear the left obstacle
-	if (irFront < irMax && irFront > irMin) {
+	if (irFront < 6) {
 		if (!bitRead(flag, obFront)) {
 			Serial.print("\t\tset front obstacle bit: ");
 			Serial.println(irFront);
@@ -130,17 +121,13 @@ void updateIR() {
 
 	//Calculate error
 	ri_curr = irRight;             //log current sensor reading [right IR]
-	ri_cerror = 5 - ri_curr; //calculate current error (too far positive, too close negative)
-	if (ri_cerror < 1 && ri_cerror > -1) ri_cerror = 0;
-	ri_derror = ri_cerror - ri_perror; //calculate change in error
-	ri_perror = ri_cerror;    //log current error as previous error [left sonar]
+	ri_cerror = ri_curr - 7; //calculate current error (too far positive, too close negative)
+	if (ri_cerror < 0.5 && ri_cerror > -0.5) ri_cerror = 0;
 
 	li_curr = irLeft;                   //log current sensor reading [left sonar]
-	li_cerror = 5 - li_curr;   //calculate current error
-	if (li_cerror < 1 && li_cerror > -1) li_cerror = 0;
-	li_derror = li_cerror - li_perror; //calculate change in error
-	li_perror = li_cerror;                //log reading as previous error
-
+	li_cerror = li_curr - 7;   //calculate current error
+	if (li_cerror < 0.5 && li_cerror > -0.5) li_cerror = 0;
+	derror = updateError();
 }
 
 /*
@@ -149,5 +136,10 @@ void updateIR() {
  */
 int updateError() {
 	derror = li_cerror - ri_cerror; //use IR data for difference error
-	return derror;
+	if (derror < 1.5) {
+		return 0;
+	} else {
+		return derror;
+	}
+
 }

@@ -46,63 +46,38 @@ void driveSetup() {
 }
 
 void forward(int rot) {
-	long positions[2]; // Array of desired stepper positions
-	stepperRight.setCurrentPosition(0);
-	stepperLeft.setCurrentPosition(0);
-	positions[0] = stepperRight.currentPosition() + rot;  //right motor absolute position
-	positions[1] = stepperLeft.currentPosition() + rot;   //left motor absolute position
-	stepperRight.move(positions[0]);  //move right motor to position
-	stepperLeft.move(positions[1]);   //move left motor to position
-//	Serial.print("Going forward: ");
-//	Serial.println(rot);
+	stepperRight.move(rot);  //move right motor to position
+	stepperLeft.move(rot);   //move left motor to position
 	runToStop();//run until the robot reaches the target
-	float dx = cos(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
-	float dy = sin(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
-	robotX = robotX + dx;
-	robotY = robotY + dy;
-//	Serial.print("Robot X: ");
-//	Serial.print(robotX);
-//	Serial.print("\t Robot Y: ");
-//	Serial.print(robotY);
-//	Serial.print("\t Robot T: ");
-//	Serial.println(robotAngle);
+//	float dx = cos(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
+//	float dy = sin(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
+//	robotX = robotX + dx;
+//	robotY = robotY + dy;
 }
 
 /*robot pivot function */
 void pivot(int rot, int dir) {
-  long positions[2];                                    // Array of desired stepper positions
-  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
-  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
   if (dir > 0) {//pivot right
-    positions[0] = stepperRight.currentPosition();    //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() + rot ; //left motor absolute position
+	  stepperLeft.move(rot);
   }
   else//pivot left
   {
-    positions[0] = stepperRight.currentPosition() + rot ; //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() ;     //left motor absolute position
+    stepperRight.move(rot);
   }
-  stepperRight.move(positions[0]);    //move right motor to position
-  stepperLeft.move(positions[1]);     //move left motor to position
   runToStop();                       //run until the robot reaches the target
 }
 
 /*robot spin function */
 void spin(int rot, int dir) {
-  long positions[2];                                    // Array of desired stepper positions
-  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
-  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
   if (dir > 0) {//spin right
-    positions[0] = stepperRight.currentPosition() - rot; //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() + rot; //left motor absolute position
+	 stepperRight.move(-rot);
+     stepperLeft.move(rot);
   }
   else//spin left
   {
-    positions[0] = stepperRight.currentPosition() + rot; //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() - rot;  //left motor absolute position
+	 stepperRight.move(-rot);
+	 stepperLeft.move(rot);
   }
-  stepperRight.move(positions[0]);    //move right motor to position
-  stepperLeft.move(positions[1]);     //move left motor to position
   runToStop();                        //run until the robot reaches the target
 }
 
@@ -113,13 +88,14 @@ void stop() {
 
 /*robot move reverse function */
 void reverse(int rot) {
-	forward(-1*rot);
+	forward(-rot);
+}
+
+void spinDegrees(float degrees) {
+	goToAngle(degrees + robotAngle);
 }
 
 void goToAngle(float degrees) {
-//	Serial.print("Going to Angle: ");
-//	Serial.print(degrees);
-//	Serial.print("\n");
 	float dAngle = degrees - robotAngle;
 	while(dAngle > 180){
 		dAngle = dAngle - 360;
@@ -127,43 +103,30 @@ void goToAngle(float degrees) {
 	while(dAngle < -180){
 		dAngle = dAngle + 360;
 	}
-//	Serial.print("delta Angle: ");
-//	Serial.print(dAngle);
-//	Serial.print("\n");
 	long numSteps = dAngle * CONST_SPIN_DEGREES_TO_STEPS;
 	stepperRight.move(numSteps);
 	stepperLeft.move(numSteps * -1);
 	runToStop();
-	while (degrees < 0) {
-		degrees += 360;
-	}
-	while (degrees > 360) {
-		degrees -= 360;
-	}
-	robotAngle = degrees;
+	//TODO: Reimplement navigation
+//	while (degrees < 0) {
+//		degrees += 360;
+//	}
+//	while (degrees > 360) {
+//		degrees -= 360;
+//	}
+//	robotAngle = degrees;
 }
 
 /*This function, runToStop(), will run the robot until the target is achieved and
    then stop it
  */
 void runToStop ( void ) {
-	int runNow = 1;
-	while (runNow) {
-		if (!stepperRight.run() ) {
-			runNow = 0;
-			stop();
-		}
-		if (!stepperLeft.run()) {
-			runNow = 0;
-			stop();
-		}
-	}
+	steppers.runSpeedToPosition();
 }
 
 void runAtSpeed(float leftSpeed, float rightSpeed) {
-	stepperLeft.setSpeed(stepperLeft.currentPosition() + 1);
-	stepperRight.setSpeed(stepperRight.currentPosition() + 1);
-	stepperLeft.move(100);
-	stepperRight.move(100);
-	steppers.run();
+	stepperLeft.setSpeed(leftSpeed);
+	stepperRight.setSpeed(rightSpeed);
+	stepperLeft.runSpeed();
+	stepperRight.runSpeed();
 }
