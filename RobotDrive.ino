@@ -46,63 +46,38 @@ void driveSetup() {
 }
 
 void forward(int rot) {
-	long positions[2]; // Array of desired stepper positions
-	stepperRight.setCurrentPosition(0);
-	stepperLeft.setCurrentPosition(0);
-	positions[0] = stepperRight.currentPosition() + rot;  //right motor absolute position
-	positions[1] = stepperLeft.currentPosition() + rot;   //left motor absolute position
-	stepperRight.move(positions[0]);  //move right motor to position
-	stepperLeft.move(positions[1]);   //move left motor to position
-//	Serial.print("Going forward: ");
-//	Serial.println(rot);
+	stepperRight.move(rot);  //move right motor to position
+	stepperLeft.move(rot);   //move left motor to position
 	runToStop();//run until the robot reaches the target
-	float dx = cos(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
-	float dy = sin(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
-	robotX = robotX + dx;
-	robotY = robotY + dy;
-//	Serial.print("Robot X: ");
-//	Serial.print(robotX);
-//	Serial.print("\t Robot Y: ");
-//	Serial.print(robotY);
-//	Serial.print("\t Robot T: ");
-//	Serial.println(robotAngle);
+//	float dx = cos(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
+//	float dy = sin(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
+//	robotX = robotX + dx;
+//	robotY = robotY + dy;
 }
 
 /*robot pivot function */
 void pivot(int rot, int dir) {
-  long positions[2];                                    // Array of desired stepper positions
-  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
-  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
   if (dir > 0) {//pivot right
-    positions[0] = stepperRight.currentPosition();    //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() + rot ; //left motor absolute position
+	  stepperLeft.move(rot);
   }
   else//pivot left
   {
-    positions[0] = stepperRight.currentPosition() + rot ; //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() ;     //left motor absolute position
+    stepperRight.move(rot);
   }
-  stepperRight.move(positions[0]);    //move right motor to position
-  stepperLeft.move(positions[1]);     //move left motor to position
   runToStop();                       //run until the robot reaches the target
 }
 
 /*robot spin function */
 void spin(int rot, int dir) {
-  long positions[2];                                    // Array of desired stepper positions
-  stepperRight.setCurrentPosition(0);                   //reset right motor to position 0
-  stepperLeft.setCurrentPosition(0);                    //reset left motor to position 0
   if (dir > 0) {//spin right
-    positions[0] = stepperRight.currentPosition() - rot; //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() + rot; //left motor absolute position
+	 stepperRight.move(-rot);
+     stepperLeft.move(rot);
   }
   else//spin left
   {
-    positions[0] = stepperRight.currentPosition() + rot; //right motor absolute position
-    positions[1] = stepperLeft.currentPosition() - rot;  //left motor absolute position
+	 stepperRight.move(-rot);
+	 stepperLeft.move(rot);
   }
-  stepperRight.move(positions[0]);    //move right motor to position
-  stepperLeft.move(positions[1]);     //move left motor to position
   runToStop();                        //run until the robot reaches the target
 }
 
@@ -113,7 +88,7 @@ void stop() {
 
 /*robot move reverse function */
 void reverse(int rot) {
-	forward(-1*rot);
+	forward(-rot);
 }
 
 void goToAngle(float degrees) {
@@ -147,24 +122,13 @@ void goToAngle(float degrees) {
    then stop it
  */
 void runToStop ( void ) {
-	bool rightRunning = true;
-	bool leftRunning = true;
-	while (rightRunning || leftRunning) {
-		rightRunning = stepperRight.run();
-		leftRunning = stepperLeft.run();
-		if (!rightRunning) {
-			stepperRight.stop();
-		}
-		if (!leftRunning) {
-			stepperLeft.stop();
-		}
-	}
+	steppers.runSpeedToPosition();
 }
 
 void runAtSpeed(float leftSpeed, float rightSpeed) {
-	stepperLeft.setSpeed(stepperLeft.currentPosition() + 1);
-	stepperRight.setSpeed(stepperRight.currentPosition() + 1);
-	stepperLeft.move(100);
-	stepperRight.move(100);
+	stepperLeft.setSpeed(leftSpeed);
+	stepperRight.setSpeed(rightSpeed);
+	stepperLeft.move(1);
+	stepperRight.move(1);
 	steppers.run();
 }
