@@ -9,20 +9,21 @@
 #ifndef IRSENSOR_H_
 #define IRSENSOR_H_
 
-#define irThresh    5 // The IR threshold for presence of an obstacle
-
-extern float irFront;  //variable to hold average of current front IR reading
-extern float irLeft;   //variable to hold average of current left IR reading
-extern float irRear;   //variable to hold average of current rear IR reading
-extern float irRight;   //variable to hold average of current right IR reading
+//bit definitions for sensor data flag byte
+#define obFront   0 // Front IR trip
+#define obRear    1 // Rear IR trip
+#define obRight   2 // Right IR trip
+#define obLeft    3 // Left IR trip
 
 extern float li_cerror;    //left ir current error
 extern float ri_cerror;    //right ir current error
 extern float derror; //difference between left and right error to center robot in the hallway
 
-extern volatile byte irFlag;    // Flag to hold IR & Sonar data - used to create the state machine
+extern volatile byte irFlag;    // Flag to hold IR data - used to create the state machine
 
+/**
+ * Updates IR sensors and all assocated data.
+ */
 void updateIR();
-int updateError();
 
 #endif /* IRSENSOR_H_ */

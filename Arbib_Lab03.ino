@@ -11,31 +11,17 @@
 #include "RobotDrive.h"
 #include "IRSensor.h"
 #include "PinDefinitions.h"
-#include "SonarSensor.h"
 
-#define stopThresh  150 // If the robot has been stopped for this threshold move
 #define baud_rate 9600//set serial communication baud rate
 
 volatile boolean test_state; //variable to hold test led state for timer interrupt
 
-int goalX = 5;
-int goalY = 2;
-
 //flag byte to hold sensor data
-volatile byte flag = 0; // Flag to hold IR & Sonar data - used to create the state machine
+volatile byte flag = 0; // Flag to hold obstacle - used to create the state machine
 
-//bit definitions for sensor data flag byte
-#define obFront   0 // Front IR trip
-#define obRear    1 // Rear IR trip
-#define obRight   2 // Right IR trip
-#define obLeft    3 // Left IR trip
-#define obFLeft   4 // Left Sonar trip
-#define obFRight  5 // Right Sonar trip
-
-int count; //count number of times collide has tripped
-#define max_collide 250 //maximum number of collides before robot reverses
-
-//state byte to hold robot motion and state data
+/**
+ * State machine varable and states
+ */
 volatile int state = 0;   //state to hold robot states and motor motion
 #define AVOID     				0   //avoid behavior
 #define WANDER    				1   //wander behavior
@@ -47,17 +33,17 @@ volatile int state = 0;   //state to hold robot states and motor motion
 #define RIGHT_OUTSIDE_CORNER 	7
 #define LEFT_OUTSIDE_CORNER		8
 
-//define layers of subsumption architecture that are active [hallway Wall Wander Avoid]
-byte layers = 4;
-#define aLayer 0      //avoid obstacle layer
-#define wLayer 1      //wander layer
-#define fwLayer 2     //follow wall layer
-#define fhLayer 3     //follow hallway layer
+/**
+ * Enum for different control modes
+ * Used as the parameter for the wallFollowing() and followWall() functions
+ */
+#define BANG_BANG				0
+#define P_CONTROL				1
+#define PD_CONTROL				2
 
-#define timer_int 100000 // 1/10 second (250000 us) period for timer interrupt
+#define timer_int 100000 // 1/10 second (100000 us) period for timer interrupt
 
-float lastError = 0;
-float outputLog = 0;
+float lastError = 0; //Previous error for derivative control
 
 void setup() {
 	//Serial setup
@@ -83,248 +69,42 @@ void setup() {
 
 void loop() {
 	updateState();  	//update State Machine based upon sensor readings
-	wallPD();
+	wallFollowing(PD_CONTROL);
 }
 
-float PController(float error) {
-	float kp = 200;
-	outputLog = kp * error;
-	return outputLog;
-}
-
-float PDController(float error) {
-	float kp = 100;
-	float kd = 20;
-	outputLog = kp*error - kd * (error - lastError);
-	lastError = error;
-	return outputLog;
-}
-
-void wallPD() {
-	Serial.print("\nWallBang: li_cerror ri_cerror\t");
-	Serial.print(li_cerror);
-	Serial.print("\t");
-	Serial.println(ri_cerror);
-	switch (state) {
-	case (FOLLOW_RIGHT):
-		Serial.println("right wall found");
-		if (ri_cerror == 0) {                 //no error, robot in deadband
-			/* THIS WORKS */
-			Serial.println("right wall detected, drive forward");
-			forward(quarter_rotation); //move robot forward. If i replace this with pivot, the robot starts freezing again (weird).
-		} else {
-			Serial.println("rt wall: adjust turn angle based upon error");
-			float output = fabs(PDController(ri_cerror));
-			if (ri_cerror < 0) {          //negative error means too close
-				Serial.println("\trt wall: too close turn left");
-				pivot(output, 0);      //pivot left
-				pivot(output, 1);  //pivot right to straighten up
-			} else if (ri_cerror > 0) {     //positive error means too far
-				Serial.println("\trt wall: too far turn right");
-				pivot(output, 1);      //pivot right
-				pivot(output, 0);   //pivot left to straighten up
-			}
-		}
-		break;
-	case (FOLLOW_LEFT):
-		if (li_cerror == 0) {       //no error robot in dead band drives forward
-			Serial.println("lt wall detected, drive forward");
-			forward(quarter_rotation);      //move robot forward
-		} else {
-			Serial.println(
-					"lt wall detected: adjust turn angle based upon error");
-			float output = fabs(PDController(li_cerror));
-			if (li_cerror < 0) { //negative error means too close
-				Serial.println("\tlt wall: too close turn right");
-				pivot(output, 1);   //pivot right
-				pivot(output, 0);   //pivot left to straighten up
-			} else if (li_cerror > 0) { //positive error means too far
-				Serial.println("\tlt wall: too far turn left");
-				pivot(output, 0);   //pivot left
-				pivot(output, 1);  //pivot right to straighten up
-			}
-		}
-		break;
-	case (CENTER):
-		if (derror == 0) {
-			//Serial.println("hallway detected, drive forward");
-			forward(half_rotation);          //drive robot forward
-		} else {
-			//Serial.println("hallway detected: adjust turn angle based upon error");
-			//try to average the error between the left and right to CENTER the robot
-			float output = fabs(PDController(derror));
-			if (derror > 0) {
-				pivot(output, 0); //spin right, the left error is larger
-				pivot(output, 1);       //pivot left to adjust forward
-			} else {
-				pivot(output, 1); //spin left the right error is larger
-				pivot(output, 0);      //pivot right to adjust forward
-			}
-		}
-		break;
-	default:
-		wanderAndCorners();
-	}
-}
-
-void wallP() {
-	Serial.print("\nWallBang: li_cerror ri_cerror\t");
-	Serial.print(li_cerror);
-	Serial.print("\t");
-	Serial.println(ri_cerror);
-	switch (state) {
-	case (FOLLOW_RIGHT):
-		Serial.println("right wall found");
-		if (ri_cerror == 0) {                 //no error, robot in deadband
-			/* THIS WORKS */
-			Serial.println("right wall detected, drive forward");
-			forward(quarter_rotation); //move robot forward. If i replace this with pivot, the robot starts freezing again (weird).
-		} else {
-			Serial.println("rt wall: adjust turn angle based upon error");
-			float output = fabs(PController(ri_cerror));
-			if (ri_cerror < 0) {          //negative error means too close
-				Serial.println("\trt wall: too close turn left");
-				pivot(output, 0);      //pivot left
-				pivot(output, 1);  //pivot right to straighten up
-			} else if (ri_cerror > 0) {     //positive error means too far
-				Serial.println("\trt wall: too far turn right");
-				pivot(output, 1);      //pivot right
-				pivot(output, 0);   //pivot left to straighten up
-			}
-		}
-		break;
-	case (FOLLOW_LEFT):
-		if (li_cerror == 0) {       //no error robot in dead band drives forward
-			Serial.println("lt wall detected, drive forward");
-			forward(quarter_rotation);      //move robot forward
-		} else {
-			Serial.println(
-					"lt wall detected: adjust turn angle based upon error");
-			float output = fabs(PController(li_cerror));
-			if (li_cerror < 0) { //negative error means too close
-				Serial.println("\tlt wall: too close turn right");
-				pivot(output, 1);   //pivot right
-				pivot(output, 0);   //pivot left to straighten up
-			} else if (li_cerror > 0) { //positive error means too far
-				Serial.println("\tlt wall: too far turn left");
-				pivot(output, 0);   //pivot left
-				pivot(output, 1);  //pivot right to straighten up
-			}
-		}
-		break;
-	case (CENTER):
-		if (((ri_cerror == 0) && (li_cerror == 0)) || (derror == 0)) {
-			//Serial.println("hallway detected, drive forward");
-			forward(half_rotation);          //drive robot forward
-		} else {
-			//Serial.println("hallway detected: adjust turn angle based upon error");
-			//try to average the error between the left and right to CENTER the robot
-			float output = fabs(PController(derror));
-			if (derror > 0) {
-				spin(output, 1); //spin right, the left error is larger
-				pivot(output, 0);       //pivot left to adjust forward
-			} else {
-				spin(output, 0); //spin left the right error is larger
-				pivot(output, 1);      //pivot right to adjust forward
-			}
-		}
-		break;
-	default:
-		wanderAndCorners();
-	}
-}
-
-/*
- This is a sample wallBang() function, the description and code should be updated to reflect the actual robot motion function that you will implement
- based upon the the lab requirements.  Some things to consider, you cannot use a blocking motor function because you need to use sensor data to update
- movement.  You also need to continue to poll    the sensors during the motion and update flags and state because this will serve as your interrupt to
- stop or change movement. This function will have the robot follow the wall if it is within 4 to 6 inches from the wall by moving forward and turn on the
- controller if it is outside that band to make an adjustment to get back within the band.
+/**
+ * This function contains the specific actions the robot should take based on the current state.
  */
-void wallBang() {
+void wallFollowing(int mode) {
 	Serial.print("\nWallBang: li_cerror ri_cerror\t");
 	Serial.print(li_cerror);
 	Serial.print("\t");
 	Serial.println(ri_cerror);
 	switch (state) {
 	case (FOLLOW_RIGHT):
-		Serial.println("right wall found");
-		if (ri_cerror == 0) {                 //no error, robot in deadband
-			/* THIS WORKS */
-			Serial.println("right wall detected, drive forward");
-			forward(quarter_rotation); //move robot forward. If i replace this with pivot, the robot starts freezing again (weird).
-		} else {
-			Serial.println("rt wall: adjust turn angle based upon error");
-			if (ri_cerror < 0) {          //negative error means too close
-				Serial.println("\trt wall: too close turn left");
-				pivot(quarter_rotation, 0);      //pivot left
-				pivot(quarter_rotation, 1);  //pivot right to straighten up
-			} else if (ri_cerror > 0) {     //positive error means too far
-				Serial.println("\trt wall: too far turn right");
-				pivot(quarter_rotation, 1);      //pivot right
-				pivot(quarter_rotation, 0);   //pivot left to straighten up
-			}
-		}
+		followWall(mode, ri_cerror);
 		break;
 	case (FOLLOW_LEFT):
-		if (li_cerror == 0) {       //no error robot in dead band drives forward
-			Serial.println("lt wall detected, drive forward");
-			forward(quarter_rotation);      //move robot forward
-		} else {
-			Serial.println(
-					"lt wall detected: adjust turn angle based upon error");
-			if (li_cerror < 0) { //negative error means too close
-				Serial.println("\tlt wall: too close turn right");
-				pivot(quarter_rotation, 1);   //pivot right
-				pivot(quarter_rotation, 0);   //pivot left to straighten up
-			} else if (li_cerror > 0) { //positive error means too far
-				Serial.println("\tlt wall: too far turn left");
-				pivot(quarter_rotation, 0);   //pivot left
-				pivot(quarter_rotation, 1);  //pivot right to straighten up
-			}
-		}
+		followWall(mode, -li_cerror);
 		break;
 	case (CENTER):
-		if (((ri_cerror == 0) && (li_cerror == 0)) || (derror == 0)) {
-			//Serial.println("hallway detected, drive forward");
-			forward(half_rotation);          //drive robot forward
-		} else {
-			//Serial.println("hallway detected: adjust turn angle based upon error");
-			//try to average the error between the left and right to CENTER the robot
-			if (derror > 0) {
-				spin(quarter_rotation, 1); //spin right, the left error is larger
-				pivot(quarter_rotation, 0);       //pivot left to adjust forward
-			} else {
-				spin(quarter_rotation, 0); //spin left the right error is larger
-				pivot(quarter_rotation, 1);      //pivot right to adjust forward
-			}
-		}
+		followWall(mode, derror);
 		break;
-	default:
-		wanderAndCorners();
-	}
-}
-
-void wanderAndCorners() {
-	switch (state) {
 	case (RIGHT_INSIDE_CORNER):
 		Serial.print("right wall: front corner ");
-		//make left turn if wall found
 		stop();
 		pivot(-quarter_rotation, 0);
-		reverse(quarter_rotation);              //back up
+		reverse(quarter_rotation);
 		pivot(-quarter_rotation, 1);
-		spinDegrees(90);              //turn left
+		spinDegrees(90);
 		break;
 	case (LEFT_INSIDE_CORNER):
-		//make right turn if wall found
 		Serial.print("left wall: front corner ");
-		//make left turn if wall found
 		stop();
 		pivot(-quarter_rotation, 1);
-		reverse(quarter_rotation);              //back up
+		reverse(quarter_rotation);
 		pivot(-quarter_rotation, 0);
-		spinDegrees(-90);              //turn right
+		spinDegrees(-90);
 		break;
 	case (LEFT_OUTSIDE_CORNER):
 		stop();
@@ -344,10 +124,37 @@ void wanderAndCorners() {
 	}
 }
 
-void randomWander() {
-	int randomAngle = random(0, 360);
-	spinDegrees((random(0, 1) ? -1 : 1) * randomAngle);
-	forward((random(0, 1) ? -1 : 1) * half_rotation);
+
+/**
+ * This function contains the specific logic to follow a wall. It determines the amount of
+ * error based on the control mode passed in, and uses pivots to shift the robot left or right.
+ */
+void followWall(int mode, float error) {
+	if (error == 0) {                 //no error, robot in deadband
+		forward(quarter_rotation);
+	} else {
+		//Calculate the amount to move based on the control method
+		float output = 0;
+		switch (mode) {
+		case (BANG_BANG):
+			output = quarter_rotation;
+			break;
+		case (P_CONTROL):
+			output = fabs(PController(error));
+			break;
+		case (PD_CONTROL):
+			output = fabs(PDController(error));
+			break;
+		}
+
+		if (output < 0) {      	//negative error means too left
+			pivot(output, 0);  	//pivot left
+			pivot(output, 1);  	//pivot right to straighten up
+		} else if (output > 0) { //positive error means too right
+			pivot(output, 1);   //pivot right
+			pivot(output, 0);  	//pivot left to straighten up
+		}
+	}
 }
 
 /*
@@ -358,12 +165,11 @@ void updateSensors() {
 	test_state = !test_state; //LED to test the heartbeat of the timer interrupt routine
 	digitalWrite(PIN_LED_TEST, test_state);	//Toggles the LED to let you know the timer is working
 	updateIR();  //update IR readings and update flag variable and state machine
-	//Serial.println(outputLog);
 }
 
-/*
- This is a sample updateState() function, the description and code should be updated to reflect the actual state machine that you will implement
- based upon the the lab requirements.
+/**
+ * Updates the state based on the obstacle flags from sensors. Calls the setState() function to
+ * actually change the state.
  */
 void updateState() {
 	if (flag == 0) { //no sensors triggered
@@ -385,6 +191,12 @@ void updateState() {
 	}
 }
 
+/**
+ * Updates the current state with the specified new state. The new state may be intercepted
+ * (e.g., going from following a wall to wandering will be intercepted with a corner state).
+ * If the new state is different from the current state, the initNewState() function will be
+ * called.
+ */
 void setState(int newState) {
 	switch (state) {
 	case (WANDER):
@@ -428,6 +240,9 @@ void setState(int newState) {
 	state = newState;
 }
 
+/**
+ * Provides any initalization necessary when transitioning to a new state.
+ */
 void initNewState(int newState) {
 	switch (newState) {
 	case (WANDER):
@@ -436,6 +251,7 @@ void initNewState(int newState) {
 		digitalWrite(PIN_RED_LED, LOW);
 		break;
 	case (FOLLOW_LEFT):
+		//We're possibly starting a new control loop, reset the last error.
 		if (state != newState) {
 			lastError = 0;
 		}
@@ -444,6 +260,7 @@ void initNewState(int newState) {
 		digitalWrite(PIN_RED_LED, LOW);
 		break;
 	case (FOLLOW_RIGHT):
+		//We're possibly starting a new control loop, reset the last error.
 		if (state != newState) {
 			lastError = 0;
 		}
@@ -477,4 +294,23 @@ void initNewState(int newState) {
 		digitalWrite(PIN_RED_LED, HIGH);
 		break;
 	}
+}
+
+/**
+ * Generic proportional controller.
+ */
+float PController(float error) {
+	float kp = 200;
+	return kp * error;
+}
+
+/**
+ * Generic proportional-derivative controller
+ */
+float PDController(float error) {
+	float kp = 100;
+	float kd = 20;
+	float output = kp * error - kd * (error - lastError);
+	lastError = error;
+	return output;
 }

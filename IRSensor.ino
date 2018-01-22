@@ -4,7 +4,7 @@
  *
  * 	This file contains the updateIR() function, which will poll the IR sensors and
  * 	convert their readings to inches. A moving average filter is applied to the readings to
- * 	reduce noise. The readings are available externally through the irFrontAvg, irLeftAvg, irRearAvg, irRightAvg, and irFlag variables.
+ * 	reduce noise.
  */
 
 #include "IRSensor.h"
@@ -16,15 +16,9 @@ int irRightArray[5] = { 0, 0, 0, 0, 0 }; //array to hold 5 right IR readings
 int irLeftArray[5] = { 0, 0, 0, 0, 0 }; //array to hold 5 left IR readings
 int irIdx = 0; //index for 5 IR readings to take the average
 
-//bit definitions for sensor data flag byte
-#define obFront   0 // Front IR trip
-#define obRear    1 // Rear IR trip
-#define obRight   2 // Right IR trip
-#define obLeft    3 // Left IR trip
-
 //define sensor constants and variables
 #define irMin    2               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
-#define irMax    12               // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMax    12              // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
 
 //define error variables
 float li_curr;    //left ir current reading
@@ -35,13 +29,26 @@ float ri_cerror;    //right ir current error
 
 float derror; //difference between left and right error to center robot in the hallway
 
+//Define IR data variables
 float irFront = 0;
 float irLeft = 0;
 float irRear = 0;
 float irRight = 0;
 volatile byte irFlag = 0;
 
+/**
+ * This function is bound to an interrupt and called every 100ms.
+ */
 void updateIR() {
+	updateIRValues();
+	updateObstacles();
+	updateError();
+}
+
+/**
+ *	Gets value from IR sensors and converts to inches.
+ */
+void updateIRValues() {
 	int front, rear, left, right;
 
 	//Get all IR values
@@ -74,24 +81,24 @@ void updateIR() {
 	irRear = irRear / 5;
 	irRight = irRight / 5;
 
-//	irFront = front;
-//	irRear = rear;
-//	irLeft = left;
-//	irRight = right;
-
-//	Convert IR values to inches based on calibration
+	//	Convert IR values to inches based on calibration
 	irFront = (1280 / (irFront + 18)) - 0.5;
 	irRear = (1100 / (irRear + 16));
 	irLeft = (3000 / (irLeft + 22)) - 2;
 	irRight = (1950 / (irRight - 34));
 
 	//  print IR data
-//	Serial.println("frontIR\tbackIR\tleftIR\trightIR");
-//	Serial.print(irFront); Serial.print("\t");
-//	Serial.print(irRear); Serial.print("\t");
-//	Serial.print(irLeft); Serial.print("\t");
-//	Serial.println(irRight);
+	//	Serial.println("frontIR\tbackIR\tleftIR\trightIR");
+	//	Serial.print(irFront); Serial.print("\t");
+	//	Serial.print(irRear); Serial.print("\t");
+	//	Serial.print(irLeft); Serial.print("\t");
+	//	Serial.println(irRight);
+}
 
+/**
+ *	Updates the obstacle flag based on the latest IR data.
+ */
+void updateObstacles() {
 	//Set obstacle flags
 	if (irRight > irMin && irRight < irMax) {
 		if (!bitRead(flag, obRight)) {
@@ -118,28 +125,25 @@ void updateIR() {
 	} else {
 		bitClear(flag, obFront);          //clear the front obstacle
 	}
+}
 
+/**
+ * Updates all of the error constants to be used for P and PD controls
+ */
+void updateError() {
 	//Calculate error
 	ri_curr = irRight;             //log current sensor reading [right IR]
 	ri_cerror = ri_curr - 7; //calculate current error (too far positive, too close negative)
-	if (ri_cerror < 0.5 && ri_cerror > -0.5) ri_cerror = 0;
+	if (ri_cerror < 0.5 && ri_cerror > -0.5)
+		ri_cerror = 0;
 
-	li_curr = irLeft;                   //log current sensor reading [left sonar]
+	li_curr = irLeft;                  //log current sensor reading [left sonar]
 	li_cerror = li_curr - 7;   //calculate current error
-	if (li_cerror < 0.5 && li_cerror > -0.5) li_cerror = 0;
-	derror = updateError();
-}
-
-/*
- This function will update all of the error constants to be used for P and PD control
- store previous error to calculate derror = curr_sensor-prev_sensor, side_derror = side front sensor - side back sensor
- */
-int updateError() {
+	if (li_cerror < 0.5 && li_cerror > -0.5)
+		li_cerror = 0;
 	derror = li_cerror - ri_cerror; //use IR data for difference error
 	if (derror < 1.5) {
-		return 0;
-	} else {
-		return derror;
+		derror = 0;
 	}
 
 }

@@ -20,6 +20,10 @@ AccelStepper stepperRight(AccelStepper::DRIVER, PIN_RT_STEP, PIN_RT_DIR); //crea
 AccelStepper stepperLeft(AccelStepper::DRIVER, PIN_LT_STEP, PIN_LT_DIR); //create instance of left stepper motor object (2 driver pins, step pin 50, direction input pin 51)
 MultiStepper steppers; //create instance to control multiple steppers at the same time
 
+/**
+ * NOTE: FUNCTION DOCUMENTATION IN RobotDrive.h
+ */
+
 void driveSetup() {
 	Serial.println("Setting up drive");
 
@@ -121,4 +125,10 @@ void goToAngle(float degrees) {
 
 void runToStop(void) {
 	steppers.runSpeedToPosition();
+}
+
+void randomWander() {
+	int randomAngle = random(0, 360);
+	spinDegrees((random(0, 1) ? -1 : 1) * randomAngle);
+	forward((random(0, 1) ? -1 : 1) * half_rotation);
 }

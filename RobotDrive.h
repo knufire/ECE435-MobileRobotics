@@ -91,4 +91,10 @@ void goToAngle(float degrees);
  */
 void runToStop();
 
+/**
+ * Performs a random wander manuever. Robot will spin to a random angle and drive forward.
+ */
+void randomWander();
+
+
 #endif /* ROBOTDRIVE_H_ */
