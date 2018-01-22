@@ -1,10 +1,11 @@
 /*	Arbib_Lab02.ino
  * 	Author: Rahul Yarlagadda, Ellie Honious
- * 	Date: December 13th, 2017
+ * 	Date: January 20th, 2018
  *
- * 	This file contains the main loop for Airbib accomplishing the tasks laid out in Lab 2.
+ * 	This file contains the main loop for Airbib accomplishing the tasks laid out in Lab 3.
  * 	This includes aggressive kid behaviors, shy kid behaviors, random-wander, and go-to-goal
- * 	functionality. Additionally, random-wander and go-to-goal have integrated obstacle avoidance.
+ * 	functionality. Additionally, random-wander and go-to-goal have integrated obstacle avoidance
+ * 	and wall follow capabilities.
  */
 
 #include <TimerOne.h>
