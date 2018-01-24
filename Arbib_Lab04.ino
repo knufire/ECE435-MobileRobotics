@@ -11,6 +11,7 @@
 #include <TimerOne.h>
 #include "RobotDrive.h"
 #include "IRSensor.h"
+#include "PhotoSensor.h"
 #include "PinDefinitions.h"
 
 #define baud_rate 9600//set serial communication baud rate
@@ -69,8 +70,7 @@ void setup() {
 }
 
 void loop() {
-	updateState();  	//update State Machine based upon sensor readings
-	wallFollowing(PD_CONTROL);
+	delay(20);
 }
 
 /**
@@ -166,6 +166,7 @@ void updateSensors() {
 	test_state = !test_state; //LED to test the heartbeat of the timer interrupt routine
 	digitalWrite(PIN_LED_TEST, test_state);	//Toggles the LED to let you know the timer is working
 	updateIR();  //update IR readings and update flag variable and state machine
+	updatePhoto();
 }
 
 /**

@@ -6,7 +6,7 @@
  * 	convert their readings to inches.
  */
 
-#include "PHTOSensor.h"
+#include "PhotoSensor.h"
 
 //Define PHOTO data variables
 
@@ -17,22 +17,21 @@ float photoRight = 0;
 /**
  * This function is bound to an interrupt and called every 100ms.
  */
-void updatePHTO() {
-	updatePHTOValues();
+void updatePhoto() {
+	updatePhotoValues();
 }
 
 /**
  *	Gets value from Photoresistor sensors.
  */
-void updatePHTOValues() {
+void updatePhotoValues() {
 	int left, right;
 
 	//Get all IR values
-	left = analogRead(PIN_PHTO_LEFT);
-	right = analogRead(PIN_PHTO_RIGHT);
+	photoLeft = analogRead(PIN_PHTO_LEFT);
+	photoRight = analogRead(PIN_PHTO_RIGHT);
 
 	//  print Photoresistor data
-	//	Serial.println("leftPHTO\trightPHTO");
-	//	Serial.print(photoLeft); Serial.print("\t");
-	//	Serial.println(photoRight);
+		Serial.print(photoLeft); Serial.print("\t");
+		Serial.println(photoRight);
 }

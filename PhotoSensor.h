@@ -7,14 +7,14 @@
  */
 
 #pragma once
-#ifndef PHTOSENSOR_H_
-#define PHTOSENSOR_H_
+#ifndef PHOTOSENSOR_H_
+#define PHOTOSENSOR_H_
 
 /**
  * Updates Photoresistor sensors and all assocated data.
  */
-void updatePHTO();
+void updatePhoto();
 
 
 
-#endif /* PHTOSENSOR_H_ */
+#endif /* PHOTOSENSOR_H_ */
