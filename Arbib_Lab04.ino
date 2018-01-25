@@ -43,6 +43,16 @@ volatile int state = 0;   //state to hold robot states and motor motion
 #define P_CONTROL				1
 #define PD_CONTROL				2
 
+
+/**
+ * Enum for different braitenberg vehicles
+ */
+int braitenberg_type;
+#define FEAR			0
+#define AGGRESSION		1
+#define LOVE			2
+#define EXPLORER		3
+
 #define timer_int 100000 // 1/10 second (100000 us) period for timer interrupt
 
 float lastError = 0; //Previous error for derivative control
@@ -67,94 +77,28 @@ void setup() {
 	Timer1.attachInterrupt(updateSensors); // attaches updateSensors() as a timer overflow interrupt
 
 	delay(1500);  //wait 3 seconds before robot moves
+
+	braitenberg_type = AGGRESSION;
 }
 
 void loop() {
-	delay(20);
+	simpleBraiteinbergVehicle();
 }
 
-/**
- * This function contains the specific actions the robot should take based on the current state.
- */
-void wallFollowing(int mode) {
-	Serial.print("\nWallBang: li_cerror ri_cerror\t");
-	Serial.print(li_cerror);
-	Serial.print("\t");
-	Serial.println(ri_cerror);
-	switch (state) {
-	case (FOLLOW_RIGHT):
-		followWall(mode, ri_cerror);
+void simpleBraiteinbergVehicle() {
+	switch (braitenberg_type) {
+	case (LOVE):
+		runAtSpeed(1000-photoLeft, 1000-photoRight);
 		break;
-	case (FOLLOW_LEFT):
-		followWall(mode, -li_cerror);
+	case (EXPLORER):
+		runAtSpeed(photoRight, photoLeft);
 		break;
-	case (CENTER):
-		followWall(mode, derror);
+	case (AGGRESSION):
+		runAtSpeed(photoLeft, photoRight);
 		break;
-	case (RIGHT_INSIDE_CORNER):
-		Serial.print("right wall: front corner ");
-		stop();
-		pivot(-quarter_rotation, 0);
-		reverse(quarter_rotation);
-		pivot(-quarter_rotation, 1);
-		spinDegrees(90);
+	case (FEAR):
+		runAtSpeed(1000-photoRight, 1000-photoLeft);
 		break;
-	case (LEFT_INSIDE_CORNER):
-		Serial.print("left wall: front corner ");
-		stop();
-		pivot(-quarter_rotation, 1);
-		reverse(quarter_rotation);
-		pivot(-quarter_rotation, 0);
-		spinDegrees(-90);
-		break;
-	case (LEFT_OUTSIDE_CORNER):
-		stop();
-		reverse(quarter_rotation);
-		spinDegrees(90);
-		forward(one_rotation + half_rotation);
-		break;
-	case (RIGHT_OUTSIDE_CORNER):
-		stop();
-		spinDegrees(-90);
-		forward(one_rotation + half_rotation);
-		break;
-	case (WANDER):
-		Serial.println("nothing to see here, I need to look for a wall");
-		randomWander();
-		break;
-	}
-}
-
-
-/**
- * This function contains the specific logic to follow a wall. It determines the amount of
- * error based on the control mode passed in, and uses pivots to shift the robot left or right.
- */
-void followWall(int mode, float error) {
-	if (error == 0) {                 //no error, robot in deadband
-		forward(quarter_rotation);
-	} else {
-		//Calculate the amount to move based on the control method
-		float output = 0;
-		switch (mode) {
-		case (BANG_BANG):
-			output = quarter_rotation;
-			break;
-		case (P_CONTROL):
-			output = fabs(PController(error));
-			break;
-		case (PD_CONTROL):
-			output = fabs(PDController(error));
-			break;
-		}
-
-		if (output < 0) {      	//negative error means too left
-			pivot(output, 0);  	//pivot left
-			pivot(output, 1);  	//pivot right to straighten up
-		} else if (output > 0) { //positive error means too right
-			pivot(output, 1);   //pivot right
-			pivot(output, 0);  	//pivot left to straighten up
-		}
 	}
 }
 
@@ -167,152 +111,4 @@ void updateSensors() {
 	digitalWrite(PIN_LED_TEST, test_state);	//Toggles the LED to let you know the timer is working
 	updateIR();  //update IR readings and update flag variable and state machine
 	updatePhoto();
-}
-
-/**
- * Updates the state based on the obstacle flags from sensors. Calls the setState() function to
- * actually change the state.
- */
-void updateState() {
-	if (flag == 0) { //no sensors triggered
-		setState(WANDER);
-	} else if (bitRead(flag,obRight) && !bitRead(flag, obLeft)) {
-		if (bitRead(flag, obFront)) {
-			setState(RIGHT_INSIDE_CORNER);
-		} else {
-			setState(FOLLOW_RIGHT);
-		}
-	} else if (bitRead(flag,obLeft) && !bitRead(flag, obRight)) {
-		if (bitRead(flag, obFront)) {
-			setState(LEFT_INSIDE_CORNER);
-		} else {
-			setState(FOLLOW_LEFT);
-		}
-	} else if (bitRead(flag,obLeft) && bitRead(flag, obRight)) {
-		setState(CENTER);
-	}
-}
-
-/**
- * Updates the current state with the specified new state. The new state may be intercepted
- * (e.g., going from following a wall to wandering will be intercepted with a corner state).
- * If the new state is different from the current state, the initNewState() function will be
- * called.
- */
-void setState(int newState) {
-	switch (state) {
-	case (WANDER):
-		break;
-	case (FOLLOW_LEFT):
-		if (newState == WANDER) {
-			newState = LEFT_OUTSIDE_CORNER;
-		}
-		break;
-	case (FOLLOW_RIGHT):
-		if (newState == WANDER) {
-			newState = RIGHT_OUTSIDE_CORNER;
-		}
-		break;
-	case (CENTER):
-		break;
-	case (LEFT_INSIDE_CORNER):
-		if (newState == LEFT_INSIDE_CORNER) {
-			newState = FOLLOW_LEFT;
-		}
-		break;
-	case (RIGHT_INSIDE_CORNER):
-		if (newState == RIGHT_INSIDE_CORNER) {
-			newState = FOLLOW_RIGHT;
-		}
-		break;
-	case (LEFT_OUTSIDE_CORNER):
-		if (state == newState) {
-			newState = WANDER;
-		}
-		break;
-	case (RIGHT_OUTSIDE_CORNER):
-		if (state == newState) {
-			newState = WANDER;
-		}
-		break;
-	}
-	if (state != newState) {
-		initNewState(newState);
-	}
-	state = newState;
-}
-
-/**
- * Provides any initalization necessary when transitioning to a new state.
- */
-void initNewState(int newState) {
-	switch (newState) {
-	case (WANDER):
-		Serial.println("\tset random wander state");
-		digitalWrite(PIN_GREEN_LED, LOW);
-		digitalWrite(PIN_RED_LED, LOW);
-		break;
-	case (FOLLOW_LEFT):
-		//We're possibly starting a new control loop, reset the last error.
-		if (state != newState) {
-			lastError = 0;
-		}
-		Serial.println("\tset follow left state");
-		digitalWrite(PIN_GREEN_LED, HIGH);
-		digitalWrite(PIN_RED_LED, LOW);
-		break;
-	case (FOLLOW_RIGHT):
-		//We're possibly starting a new control loop, reset the last error.
-		if (state != newState) {
-			lastError = 0;
-		}
-		Serial.println("\tset follow right state");
-		digitalWrite(PIN_GREEN_LED, HIGH);
-		digitalWrite(PIN_RED_LED, LOW);
-		break;
-	case (CENTER):
-		Serial.println("\tset follow hallway state");
-		digitalWrite(PIN_GREEN_LED, LOW);
-		digitalWrite(PIN_RED_LED, HIGH);
-		break;
-	case (LEFT_INSIDE_CORNER):
-		Serial.println("\tset left corner state");
-		digitalWrite(PIN_GREEN_LED, HIGH);
-		digitalWrite(PIN_RED_LED, HIGH);
-		break;
-	case (RIGHT_INSIDE_CORNER):
-		Serial.println("\tset right corner state");
-		digitalWrite(PIN_GREEN_LED, HIGH);
-		digitalWrite(PIN_RED_LED, HIGH);
-		break;
-	case (LEFT_OUTSIDE_CORNER):
-		Serial.println("\tset left outside corner state");
-		digitalWrite(PIN_GREEN_LED, HIGH);
-		digitalWrite(PIN_RED_LED, HIGH);
-		break;
-	case (RIGHT_OUTSIDE_CORNER):
-		Serial.println("\tset right outside corner state");
-		digitalWrite(PIN_GREEN_LED, HIGH);
-		digitalWrite(PIN_RED_LED, HIGH);
-		break;
-	}
-}
-
-/**
- * Generic proportional controller.
- */
-float PController(float error) {
-	float kp = 200;
-	return kp * error;
-}
-
-/**
- * Generic proportional-derivative controller
- */
-float PDController(float error) {
-	float kp = 100;
-	float kd = 20;
-	float output = kp * error - kd * (error - lastError);
-	lastError = error;
-	return output;
 }

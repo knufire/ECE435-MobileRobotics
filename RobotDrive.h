@@ -96,5 +96,10 @@ void runToStop();
  */
 void randomWander();
 
+/**
+ * Runs both wheels at the specified speed. Does not block.
+ */
+void runAtSpeed(int leftSpeed, int rightSpeed);
+
 
 #endif /* ROBOTDRIVE_H_ */

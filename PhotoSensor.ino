@@ -22,7 +22,7 @@ void updatePhoto() {
 }
 
 /**
- *	Gets value from Photoresistor sensors.
+*	Gets value from Photoresistor sensors.
  */
 void updatePhotoValues() {
 	int left, right;

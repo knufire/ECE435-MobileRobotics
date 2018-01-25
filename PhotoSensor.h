@@ -10,6 +10,9 @@
 #ifndef PHOTOSENSOR_H_
 #define PHOTOSENSOR_H_
 
+
+extern float photoLeft;
+extern float photoRight;
 /**
  * Updates Photoresistor sensors and all assocated data.
  */

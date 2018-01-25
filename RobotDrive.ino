@@ -127,6 +127,13 @@ void runToStop(void) {
 	steppers.runSpeedToPosition();
 }
 
+void runAtSpeed(int leftSpeed, int rightSpeed) {
+	stepperLeft.setSpeed(leftSpeed);
+	stepperRight.setSpeed(rightSpeed);
+	stepperLeft.runSpeed();
+	stepperRight.runSpeed();
+}
+
 void randomWander() {
 	int randomAngle = random(0, 360);
 	spinDegrees((random(0, 1) ? -1 : 1) * randomAngle);
