@@ -97,9 +97,15 @@ void runToStop();
 void randomWander();
 
 /**
- * Runs both wheels at the specified speed. Does not block.
+ * Sets the speed of both wheels.
  */
-void runAtSpeed(int leftSpeed, int rightSpeed);
+void setSpeed(int leftSpeed, int rightSpeed);
 
+/**
+ * Runs both wheels at constant speed. Blocks for the specified number of milliseconds.
+ */
+void runSpeed(unsigned int ms);
+
+bool goToGoal(int goalX, int goalY);
 
 #endif /* ROBOTDRIVE_H_ */

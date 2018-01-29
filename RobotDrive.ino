@@ -127,15 +127,56 @@ void runToStop(void) {
 	steppers.runSpeedToPosition();
 }
 
-void runAtSpeed(int leftSpeed, int rightSpeed) {
+void setSpeed(int leftSpeed, int rightSpeed) {
 	stepperLeft.setSpeed(leftSpeed);
 	stepperRight.setSpeed(rightSpeed);
-	stepperLeft.runSpeed();
-	stepperRight.runSpeed();
+}
+
+void runSpeed(unsigned int ms) {
+	unsigned long startTime = millis();
+	while (millis() < startTime + ms) {
+		stepperLeft.runSpeed();
+		stepperRight.runSpeed();
+	}
 }
 
 void randomWander() {
 	int randomAngle = random(0, 360);
 	spinDegrees((random(0, 1) ? -1 : 1) * randomAngle);
 	forward((random(0, 1) ? -1 : 1) * half_rotation);
+}
+
+bool goToGoal(int goalX, int goalY) {
+	Serial.print("Going to goal:\t");
+	Serial.print(robotX);
+	Serial.print("\t");
+	Serial.println(robotY);
+	float goalAngle = atan2((goalY - robotY), (goalX - robotX));
+	float robotRadAngle = robotAngle * PI / 180;
+	float dAngle = goalAngle - robotRadAngle;
+	float obstacleX = cos(dAngle);
+	float obstacleY = sin(dAngle);
+	int multiplier = 1;
+//	if (bitRead(flag, obFront)) {
+//		forward(-1 * half_rotation);
+//		multiplier = 2;
+//		obstacleX--;
+//	}
+//	if (bitRead(flag, obRear)) {
+//		multiplier = 2;
+//		obstacleX++;
+//	}
+//	if (bitRead(flag, obLeft)) {
+//		multiplier = 2;
+//		obstacleY++;
+//	}
+//	if (bitRead(flag, obRight)) {
+//		obstacleY--;
+//		multiplier = 2;
+//	}
+	float angleInRad = atan2(obstacleY, obstacleX);
+	float angleInDeg = angleInRad / PI * 180;
+	goToAngle(angleInDeg + robotAngle);
+	forward(quarter_rotation * multiplier);
+	return (abs(robotX - goalX) < 0.2 && abs(robotY - goalY) < 0.2);
 }

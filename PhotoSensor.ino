@@ -25,13 +25,12 @@ void updatePhoto() {
 *	Gets value from Photoresistor sensors.
  */
 void updatePhotoValues() {
-	int left, right;
 
 	//Get all IR values
 	photoLeft = analogRead(PIN_PHTO_LEFT);
 	photoRight = analogRead(PIN_PHTO_RIGHT);
 
 	//  print Photoresistor data
-		Serial.print(photoLeft); Serial.print("\t");
-		Serial.println(photoRight);
+//		Serial.print(photoLeft); Serial.print("\t");
+//		Serial.println(photoRight);
 }
