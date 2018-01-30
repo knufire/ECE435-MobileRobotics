@@ -41,6 +41,9 @@ volatile int robotState;
 
 #define timer_int 100000 // 1/10 second (100000 us) period for timer interrupt
 
+int goalX;
+int goalY;
+
 void setup() {
 	//Serial setup
 	Serial.begin(baud_rate); //start serial communication in order to debug the software while coding
@@ -67,8 +70,9 @@ void setup() {
 
 void loop() {
 //	goToLightAndAvoidObstacles();
-	homingAndDocking();
-	delay(100);
+//homingAndDocking();
+	pivot(one_rotation + half_rotation, 0);
+	delay(1000);
 }
 
 /*
@@ -221,9 +225,8 @@ void setState(int newState) {
 		digitalWrite(PIN_RED_LED, LOW);
 		break;
 	case DOCKING:
-		robotX = 0;
-		robotY = 0;
-		robotAngle = 0;
+		goalX = robotPose(0);
+		goalY = robotPose(1);
 		digitalWrite(PIN_LED_TEST, HIGH);
 		digitalWrite(PIN_GREEN_LED, LOW);
 		digitalWrite(PIN_RED_LED, HIGH);

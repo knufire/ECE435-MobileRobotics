@@ -36,6 +36,8 @@ float irRear = 0;
 float irRight = 0;
 volatile byte irFlag = 0;
 
+int front, rear, left, right;
+
 /**
  * This function is bound to an interrupt and called every 100ms.
  */
@@ -49,7 +51,7 @@ void updateIR() {
  *	Gets value from IR sensors and converts to inches.
  */
 void updateIRValues() {
-	int front, rear, left, right;
+
 
 	//Get all IR values
 	front = analogRead(PIN_IR_FRONT);

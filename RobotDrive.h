@@ -29,20 +29,11 @@
 #define four_rotation 		3200
 #define five_rotation 		4000
 
-
 /**
  * These are experimentally defined constants to convert motor steps to real-world units.
  */
-#define CONST_FEET_TO_STEPS 912.2
-#define CONST_SPIN_DEGREES_TO_STEPS 5.5
-
-/**
- * These variables contain the current (x,y) position of the robot, along with the angle it is facing
- * relative to startup. They are exernal, so the main program file can accces them.
- */
-extern float robotX;
-extern float robotY;
-extern float robotAngle;
+#define CONST_FEET_TO_STEPS 320.0
+#define CONST_SPIN_DEGREES_TO_STEPS 5.635
 
 /**
  * Contains the initalizaiton routines for the stepper motor drivers and the AccelStepper library.

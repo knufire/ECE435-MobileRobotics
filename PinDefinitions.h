@@ -19,6 +19,8 @@
 #define PIN_STEP_ENABLE	48		//Stepper enable pin
 #define PIN_LED_ENABLE	13
 #define PIN_LED_TEST 	13
+#define PIN_ENCODER_LEFT 2
+#define PIN_ENCODER_RIGHT 3
 
 /*------------------------Analog IO---------------------------------*/
 //		Name		   Pin #	Description
@@ -31,6 +33,8 @@
 #define PIN_BUTTON    	A15    	//pushbutton
 #define PIN_PHTO_LEFT	A6
 #define PIN_PHTO_RIGHT	A7
+
+
 
 
 

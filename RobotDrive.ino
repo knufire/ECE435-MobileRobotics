@@ -12,10 +12,6 @@
 #include "RobotDrive.h"
 #include "PinDefinitions.h"
 
-float robotX = 0;
-float robotY = 0;
-float robotAngle = 0;
-
 AccelStepper stepperRight(AccelStepper::DRIVER, PIN_RT_STEP, PIN_RT_DIR); //create instance of right stepper motor object (2 driver pins, low to high transition step pin 52, direction input pin 53 (high means forward)
 AccelStepper stepperLeft(AccelStepper::DRIVER, PIN_LT_STEP, PIN_LT_DIR); //create instance of left stepper motor object (2 driver pins, step pin 50, direction input pin 51)
 MultiStepper steppers; //create instance to control multiple steppers at the same time
@@ -51,17 +47,16 @@ void forward(int rot) {
 	stepperRight.move(rot);	//move right motor to position
 	stepperLeft.move(rot); 	//move left motor to position
 	runToStop();   			//run until the robot reaches the target
-
-	//Update the robot's position
-	robotX += cos(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
-	robotY += sin(robotAngle * PI / 180) * rot / CONST_FEET_TO_STEPS;
+	updateRobotPosition(rot, rot);
 }
 
 void pivot(int rot, int dir) {
 	if (dir > 0) {
 		stepperLeft.move(rot);
+		updateRobotPosition(rot, 0);
 	} else {
 		stepperRight.move(rot);
+		updateRobotPosition(0, rot);
 	}
 	runToStop();
 	//TODO: Update robot postition variables.
@@ -71,17 +66,7 @@ void spin(int rot) {
 	stepperRight.move(-rot);
 	stepperLeft.move(rot);
 	runToStop();
-
-	//Update the robot's angle.
-	robotAngle += rot / CONST_SPIN_DEGREES_TO_STEPS;
-
-	//Ensure that the robot angle is between 0 and 360 degrees.
-	while (robotAngle < 0) {
-		robotAngle += 360;
-	}
-	while (robotAngle > 360) {
-		robotAngle -= 360;
-	}
+	updateRobotPosition(rot, -rot);
 }
 
 void stop() {
@@ -94,11 +79,14 @@ void reverse(int rot) {
 }
 
 void spinDegrees(float degrees) {
-	goToAngle(degrees + robotAngle);
+	//Convert change in angle into motor steps
+	long numSteps = degrees * CONST_SPIN_DEGREES_TO_STEPS;
+	spin(numSteps);
 }
 
 void goToAngle(float degrees) {
 	//Use the robot's current angle to figure out the needed change in angle
+	float robotAngle = robotPose(2) / PI * 180;
 	float dAngle = degrees - robotAngle;
 
 	//Ensure the change in angle is between -180 and 180 for the shortest spin possible
@@ -108,19 +96,8 @@ void goToAngle(float degrees) {
 	while (dAngle < -180) {
 		dAngle = dAngle + 360;
 	}
+	spinDegrees(dAngle);
 
-	//Convert change in angle into motor steps
-	long numSteps = dAngle * CONST_SPIN_DEGREES_TO_STEPS;
-	spin(numSteps);
-
-	//Update new robot angle
-	while (degrees < 0) {
-		degrees += 360;
-	}
-	while (degrees > 360) {
-		degrees -= 360;
-	}
-	robotAngle = degrees;
 }
 
 void runToStop(void) {
@@ -133,11 +110,17 @@ void setSpeed(int leftSpeed, int rightSpeed) {
 }
 
 void runSpeed(unsigned int ms) {
+	int leftPos = stepperLeft.currentPosition();
+	int rightPos = stepperRight.currentPosition();
 	unsigned long startTime = millis();
+
 	while (millis() < startTime + ms) {
 		stepperLeft.runSpeed();
 		stepperRight.runSpeed();
 	}
+	leftPos = stepperLeft.currentPosition() - leftPos;
+	rightPos = stepperRight.currentPosition() - rightPos;
+	updateRobotPosition(leftPos, rightPos);
 }
 
 void randomWander() {
@@ -147,6 +130,10 @@ void randomWander() {
 }
 
 bool goToGoal(int goalX, int goalY) {
+	float robotX = robotPose(0);
+	float robotY = robotPose(1);
+	float robotAngle = robotPose(2);
+
 	Serial.print("Going to goal:\t");
 	Serial.print(robotX);
 	Serial.print("\t");
@@ -180,3 +167,4 @@ bool goToGoal(int goalX, int goalY) {
 	forward(quarter_rotation * multiplier);
 	return (abs(robotX - goalX) < 0.2 && abs(robotY - goalY) < 0.2);
 }
+
