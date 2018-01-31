@@ -34,25 +34,11 @@
 #include <SPI.h>//include serial peripheral interface library
 #include <RF24.h>//include wireless transceiver library
 #include <nRF24L01.h>//include wireless transceiver library
-
-// Set up the wireless transceiver pins
-#define CE_PIN  7
-#define CSN_PIN 8
-#define baud_rate 9600
+#include "PinDefinitions.h"
 
 //variables
 boolean transmit = true;              //set variable to send or receive data (use same code for both devices but change variable)
 boolean uno = false;                   //set variable for type of microcontroller sending (uno-true-laptop,uno-false-robot)
-RF24 radio(CE_PIN, CSN_PIN);          //create instance of radio object
-#define team_channel 14              //set communication channel
-
-const uint64_t pipe = 0xE8E8F0F0E1LL;   //define the radio transmit pipe
-byte addresses[][6] = {"1Node", "2Node"};//unique address between transmitter and receiver
-uint8_t data[1];                        //variable to hold transmit data
-uint8_t incoming[1];                        //variable to hold receive data
-uint8_t state[] = {0, 0};               //variable to hold receive data position
-uint8_t mapDat[4][4];                   //variable to hold receive data MAP
-uint8_t lastSend;                      // Store last send time
 
 void setup() {
   Serial.begin(baud_rate);//start serial communication

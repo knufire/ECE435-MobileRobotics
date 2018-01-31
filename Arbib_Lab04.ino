@@ -14,9 +14,6 @@
 #include "PhotoSensor.h"
 #include "PinDefinitions.h"
 #include "WallFollowing.h"
-#include <SPI.h> 				//include serial peripheral interface library
-#include <RF24.h> 				//include wireless transceiver library
-#include <nRF24L01.h> 			//include wireless transceiver library
 
 #define baud_rate 9600//set serial communication baud rate
 

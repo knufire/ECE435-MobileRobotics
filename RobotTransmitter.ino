@@ -33,17 +33,7 @@
 #include <nRF24L01.h>
 #include <printf.h>
 #include <RF24_config.h>
-
-
-// Set up the wireless transceiver pins
-#define CE_PIN  7
-#define CSN_PIN 8
-#define test_LED 13
-#define team_channel 14   //transmitter and receiver on same channel between 1 & 125
-
-const uint64_t pipe = 0xE8E8F0F0E1LL; //define the radio transmit pipe (5 Byte configurable)
-RF24 radio(CE_PIN, CSN_PIN);          //create radio object
-uint8_t data[1];                      //variable to hold transmit data
+#include "PinDefinitions.h"
 
 void setup() {
   Serial.begin(9600);//start serial communication
