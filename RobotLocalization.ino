@@ -15,6 +15,9 @@ using namespace BLA;
 
 Matrix<3> robotPose;
 
+/**
+ * Updates the robot pose based on the number of steps each wheel has spun.
+ */
 void updateRobotPosition(int leftSteps, int rightSteps) {
 	float vl = leftSteps / CONST_FEET_TO_STEPS;
 	float vr = rightSteps / CONST_FEET_TO_STEPS;
@@ -24,21 +27,55 @@ void updateRobotPosition(int leftSteps, int rightSteps) {
 	Serial.print(vr);
 
 	//Edge case: robot isn't moving
-	if (vl == 0 && vr == 0)
-		return;
+	if (vl == 0 && vr == 0) {
+		//Do nothing
+	}
 
 	//Edge case: robot is moving straight
-	if (fabs(vl - vr) < 0.01) {
+	else if (fabs(vl - vr) < 0.01) {
 		updatePositionStraight(vl, vr);
-		return;
 	}
 
 	//Edge case: robot is spinning
-	if (fabs(fabs(vl) - fabs(vr)) < 0.01) {
+	else if (fabs(fabs(vl) - fabs(vr)) < 0.01) {
 		updatePostionSpin(vl, vr);
 		return;
 	}
 
+	//No edge cases, use forward kinematics
+	else {
+		updatePositionGeneral(vl, vr);
+	}
+
+	clampAngle();
+	printPose();
+}
+
+/**
+ * Update the robot pose using the specified left and right wheel velocities.
+ * Assumes the robot is driving in a straight line.
+ */
+void updatePositionStraight(float vl, float vr) {
+	float dx = vl * cos(robotPose(2));
+	float dy = vl * sin(robotPose(2));
+	robotPose(0) = robotPose(0) + dx;
+	robotPose(1) = robotPose(1) + dy;
+}
+
+/**
+ * Update the robot pose using the specified left and right wheel velocities.
+ * Assuems the robot is performing a spin about the center of the robot.
+ */
+void updatePostionSpin(float vl, float vr) {
+	float w = (vr - vl) / 2;
+	robotPose(2) = robotPose(2) + w;
+}
+
+/**
+ * Update the robot pose using the specified left and right wheel velocities.
+ * Uses a differential drive foward kinematic model.
+ */
+void updatePositionGeneral(float vl, float vr) {
 	//Calculate angular velocity
 	float w = (vr - vl) / 2;
 
@@ -71,27 +108,11 @@ void updateRobotPosition(int leftSteps, int rightSteps) {
 		 w;
 
 	robotPose = M * X + B;
-
-	clampAngle();
-	printPose();
 }
 
-void updatePositionStraight(float vl, float vr) {
-	float dx = vl * cos(robotPose(2));
-	float dy = vl * sin(robotPose(2));
-	robotPose(0) = robotPose(0) + dx;
-	robotPose(1) = robotPose(1) + dy;
-	printPose();
-}
-
-void updatePostionSpin(float vl, float vr) {
-	float w = (vr - vl) / 2;
-	robotPose(2) = robotPose(2) + w;
-	clampAngle();
-	printPose();
-	return;
-}
-
+/**
+ * Ensure the robot angle is within (0,2*PI).
+ */
 void clampAngle() {
 	while (robotPose(2) > 2 * PI) {
 		robotPose(2) = robotPose(2) - 2 * PI;
@@ -101,6 +122,9 @@ void clampAngle() {
 	}
 }
 
+/**
+ * Print the current robot pose to the serial monitor.
+ */
 void printPose() {
 	Serial.print("X: ");
 	Serial.print(robotPose(0));

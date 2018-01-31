@@ -130,41 +130,45 @@ void randomWander() {
 }
 
 bool goToGoal(int goalX, int goalY) {
+	//Get current robot pose
 	float robotX = robotPose(0);
 	float robotY = robotPose(1);
 	float robotAngle = robotPose(2);
 
-	Serial.print("Going to goal:\t");
-	Serial.print(robotX);
-	Serial.print("\t");
-	Serial.println(robotY);
+	//Get vector towards the current goal
 	float goalAngle = atan2((goalY - robotY), (goalX - robotX));
 	float robotRadAngle = robotAngle * PI / 180;
 	float dAngle = goalAngle - robotRadAngle;
+
+	//Find obstacles and add vectors to avoid them.
 	float obstacleX = cos(dAngle);
 	float obstacleY = sin(dAngle);
 	int multiplier = 1;
-//	if (bitRead(flag, obFront)) {
-//		forward(-1 * half_rotation);
-//		multiplier = 2;
-//		obstacleX--;
-//	}
-//	if (bitRead(flag, obRear)) {
-//		multiplier = 2;
-//		obstacleX++;
-//	}
-//	if (bitRead(flag, obLeft)) {
-//		multiplier = 2;
-//		obstacleY++;
-//	}
-//	if (bitRead(flag, obRight)) {
-//		obstacleY--;
-//		multiplier = 2;
-//	}
+	if (bitRead(flag, obFront)) {
+		forward(-1 * half_rotation);
+		multiplier = 2;
+		obstacleX--;
+	}
+	if (bitRead(flag, obRear)) {
+		multiplier = 2;
+		obstacleX++;
+	}
+	if (bitRead(flag, obLeft)) {
+		multiplier = 2;
+		obstacleY++;
+	}
+	if (bitRead(flag, obRight)) {
+		obstacleY--;
+		multiplier = 2;
+	}
+
+	//Calculate angle resulting from vector sum.
 	float angleInRad = atan2(obstacleY, obstacleX);
 	float angleInDeg = angleInRad / PI * 180;
 	goToAngle(angleInDeg + robotAngle);
 	forward(quarter_rotation * multiplier);
-	return (abs(robotX - goalX) < 0.2 && abs(robotY - goalY) < 0.2);
+
+	//Return whether the robot is close enough to the goal.
+	return (abs(robotX - goalX) < 0.25 && abs(robotY - goalY) < 0.25);
 }
 

@@ -51,8 +51,6 @@ void updateIR() {
  *	Gets value from IR sensors and converts to inches.
  */
 void updateIRValues() {
-
-
 	//Get all IR values
 	front = analogRead(PIN_IR_FRONT);
 	rear = analogRead(PIN_IR_REAR);

@@ -16,5 +16,9 @@ extern BLA::Matrix<3> robotPose;
 
 #define WHEELBASE_LENGTH = 8.5;
 
+/**
+ * Updates the robot pose based on the number of steps each wheel has spun.
+ */
+void updateRobotPosition(int leftSteps, int rightSteps);
 
 #endif /* ROBOTLOCALIZATION_H_ */

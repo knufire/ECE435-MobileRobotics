@@ -3,8 +3,8 @@
  * 	Author: Rahul Yarlagadda, Ellie Honious
  * 	Date: December 13th, 2017
  *
- * 	This file contains the basic motor control and odometry code for the robot. Basic functions for driving forward, reverse
- * 	and going to an angle are written.
+ * 	This file contains behaviors for following walls and navigating corners. It also maintains it's own internal state
+ * 	machine to execute corner manuvers and continue following.
  */
 
 #include "WallFollowing.h"
@@ -13,6 +13,9 @@ int wallState = 0;
 
 float lastError = 0; //Previous error for derivative control
 
+/**
+ * Follows a wall, including hallways and corners. This is a state machine.
+ */
 void followWall() {
 	updateWallState();
 	if (wallState != WANDER) {
@@ -27,7 +30,6 @@ void followWall() {
 	case (FOLLOW_RIGHT):
 		Serial.println("right wall found");
 		if (ri_cerror == 0) {                 //no error, robot in deadband
-			/* THIS WORKS */
 			Serial.println("right wall detected, drive forward");
 			forward (quarter_rotation); //move robot forward. If i replace this with pivot, the robot starts freezing again (weird).
 		} else {
@@ -116,6 +118,9 @@ void followWall() {
 	}
 }
 
+/**
+ * A generic PD controller to maintain a set distance away from the wall.
+ */
 float PDController(float error) {
 	float kp = 100;
 	float kd = 20;
@@ -124,9 +129,8 @@ float PDController(float error) {
 	return output;
 }
 
-/*
- This is a sample updateState() function, the description and code should be updated to reflect the actual wallState machine that you will implement
- based upon the the lab requirements.
+/**
+ * Automatically updates the wall following state based on sensor feedback.
  */
 void updateWallState() {
 	if (flag == 0) { //no sensors triggered
@@ -148,6 +152,9 @@ void updateWallState() {
 	}
 }
 
+/**
+ * Updates the current wall state to the newState, checking for illegal state transitions and correcting them.
+ */
 void setWallState(int newState) {
 	switch (wallState) {
 	case (WANDER):
@@ -191,6 +198,9 @@ void setWallState(int newState) {
 	wallState = newState;
 }
 
+/**
+ * Performs any initalization necessray when changing states.
+ */
 void initNewWallState(int newState) {
 	switch (newState) {
 	case (WANDER):

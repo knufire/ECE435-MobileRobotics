@@ -75,9 +75,7 @@ void setup() {
 
 void loop() {
 //	goToLightAndAvoidObstacles();
-//homingAndDocking();
-	spinDegrees(90);
-	delay(1000);
+	homingAndDocking();
 }
 
 /*
@@ -92,6 +90,10 @@ void updateSensors() {
 
 /**
  * Lab Part 1
+ */
+
+/**
+ * Subsumption architecture to drive towards light while following walls and randomly wandering.
  */
 void goToLightAndAvoidObstacles() {
 	int wheelSpeed[2];
@@ -132,10 +134,16 @@ void goToLightAndAvoidObstacles() {
 	free(lightSpeeds);
 }
 
+/**
+ * Returns true if the robot is very close to a light source.
+ */
 bool atLight() {
 	return photoLeft > 900 || photoRight > 900;
 }
 
+/**
+ * Local obstacle avoidance behavior.
+ */
 int* obstacleAvoidance() {
 	int* speeds = calloc(2, sizeof(int));
 	if (bitRead(flag, obFront)) {
@@ -159,6 +167,9 @@ int* obstacleAvoidance() {
 	return speeds;
 }
 
+/**
+ * Defines Braiteinberg Vehicle behaviors. Returns wheel speeds for the left and right wheel.
+ */
 int* simpleBraiteinbergVehicle() {
 	int* speeds = calloc(2, sizeof(int));
 	if (photoLeft < 350 && photoRight < 350) {
@@ -193,6 +204,9 @@ int* simpleBraiteinbergVehicle() {
  * Lab Part 2
  */
 
+/**
+ * This state machine manages wall-following, homing, docking, and randomly wandering.
+ */
 void homingAndDocking() {
 	updateState();
 	switch (robotState) {
@@ -211,17 +225,19 @@ void homingAndDocking() {
 	}
 }
 
+/**
+ * Uses the simpleBraitenbergVehicle behaviors to drive towards the light.
+ */
 void goToLight() {
 	int* wheelSpeed = simpleBraiteinbergVehicle();
-	float magnitude = wheelSpeed[LEFT]/2 + wheelSpeed[RIGHT]/2;
-	float turn = wheelSpeed[LEFT] - wheelSpeed[RIGHT];
-	spinDegrees(-(turn*90)/1000);
-	forward(quarter_rotation);
-//	setSpeed(wheelSpeed[LEFT], wheelSpeed[RIGHT]);
-//	runSpeed(250);
+	setSpeed(wheelSpeed[RIGHT], wheelSpeed[LEFT]);
+	runSpeed(250);
 	free(wheelSpeed);
 }
 
+/**
+ * Sets the current state to the new state. Performs any initalization necessary.
+ */
 void setState(int newState) {
 	switch (newState) {
 	case FOLLOW_WALL:
@@ -245,6 +261,9 @@ void setState(int newState) {
 	robotState = newState;
 }
 
+/**
+ * Updates the current state based on sensor values. Uses the setState function to perform the state change.
+ */
 void updateState() {
 	switch (robotState) {
 	case FOLLOW_WALL:

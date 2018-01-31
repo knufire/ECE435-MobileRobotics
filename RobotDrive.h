@@ -97,6 +97,9 @@ void setSpeed(int leftSpeed, int rightSpeed);
  */
 void runSpeed(unsigned int ms);
 
+/**
+ * Drives towards a goal location using odometry.
+ */
 bool goToGoal(int goalX, int goalY);
 
 #endif /* ROBOTDRIVE_H_ */

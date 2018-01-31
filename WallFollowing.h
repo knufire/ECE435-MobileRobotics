@@ -1,10 +1,10 @@
 /**
- * WallFollowing.h
+ * WallFollowing.ino
  * 	Author: Rahul Yarlagadda, Ellie Honious
  * 	Date: December 13th, 2017
  *
- * 	This file contains the basic motor control and odometry code for the robot. Basic functions for driving forward, reverse
- * 	and going to an angle are written.
+ * 	This file contains behaviors for following walls and navigating corners. It also maintains it's own internal state
+ * 	machine to execute corner manuvers and continue following.
  */
 
 #pragma once
@@ -25,6 +25,9 @@ extern int wallState;   //state to hold robot states and motor motion
 #define RIGHT_OUTSIDE_CORNER 	7
 #define LEFT_OUTSIDE_CORNER		8
 
+/**
+ * Follows a wall if presesnt, otherwise randomly wanders. Uses blocking drive functions. Directly interfaces with the robot drivetrain.
+ */
 void followWall();
 
 
