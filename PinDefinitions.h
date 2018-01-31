@@ -15,7 +15,7 @@
 #define PIN_RT_STEP 	46		//left stepper motor step pin
 #define PIN_RT_DIR 		53		//left stepper motor direction pin
 #define PIN_GREEN_LED 	6		//Green LED on the breadboard
-#define PIN_RED_LED 	7		//Red LED on the breadboard
+#define PIN_RED_LED 	5		//Red LED on the breadboard
 #define PIN_STEP_ENABLE	48		//Stepper enable pin
 #define PIN_LED_ENABLE	13
 #define PIN_LED_TEST 	13
