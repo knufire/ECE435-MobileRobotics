@@ -71,7 +71,7 @@ void setup() {
 void loop() {
 //	goToLightAndAvoidObstacles();
 //homingAndDocking();
-	pivot(one_rotation + half_rotation, 0);
+	spinDegrees(90);
 	delay(1000);
 }
 
@@ -210,7 +210,7 @@ void goToLight() {
 	int* wheelSpeed = simpleBraiteinbergVehicle();
 	float magnitude = wheelSpeed[LEFT]/2 + wheelSpeed[RIGHT]/2;
 	float turn = wheelSpeed[LEFT] - wheelSpeed[RIGHT];
-	spinDegrees((turn*90)/1000);
+	spinDegrees(-(turn*90)/1000);
 	forward(quarter_rotation);
 //	setSpeed(wheelSpeed[LEFT], wheelSpeed[RIGHT]);
 //	runSpeed(250);

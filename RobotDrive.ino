@@ -80,7 +80,7 @@ void reverse(int rot) {
 
 void spinDegrees(float degrees) {
 	//Convert change in angle into motor steps
-	long numSteps = degrees * CONST_SPIN_DEGREES_TO_STEPS;
+	long numSteps = -degrees * CONST_SPIN_DEGREES_TO_STEPS;
 	spin(numSteps);
 }
 

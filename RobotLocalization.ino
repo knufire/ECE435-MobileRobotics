@@ -19,6 +19,10 @@ void updateRobotPosition(int leftSteps, int rightSteps) {
 	float vl = leftSteps / CONST_FEET_TO_STEPS;
 	float vr = rightSteps / CONST_FEET_TO_STEPS;
 
+	Serial.print(vl);
+	Serial.print("\t");
+	Serial.print(vr);
+
 	//Edge case: robot isn't moving
 	if (vl == 0 && vr == 0)
 		return;
@@ -26,11 +30,13 @@ void updateRobotPosition(int leftSteps, int rightSteps) {
 	//Edge case: robot is moving straight
 	if (fabs(vl - vr) < 0.01) {
 		updatePositionStraight(vl, vr);
+		return;
 	}
 
 	//Edge case: robot is spinning
 	if (fabs(fabs(vl) - fabs(vr)) < 0.01) {
 		updatePostionSpin(vl, vr);
+		return;
 	}
 
 	//Calculate angular velocity
@@ -70,7 +76,7 @@ void updateRobotPosition(int leftSteps, int rightSteps) {
 	printPose();
 }
 
-void updatePositionStraight(int vl, int vr) {
+void updatePositionStraight(float vl, float vr) {
 	float dx = vl * cos(robotPose(2));
 	float dy = vl * sin(robotPose(2));
 	robotPose(0) = robotPose(0) + dx;
@@ -78,8 +84,9 @@ void updatePositionStraight(int vl, int vr) {
 	printPose();
 }
 
-void updatePostionSpin(int vl, int vr) {
-	robotPose(2) = robotPose(2) + ((vr - vl) / 2);
+void updatePostionSpin(float vl, float vr) {
+	float w = (vr - vl) / 2;
+	robotPose(2) = robotPose(2) + w;
 	clampAngle();
 	printPose();
 	return;
