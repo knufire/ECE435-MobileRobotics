@@ -14,6 +14,7 @@
     GND GND
 */
 
+#include "WirelessReceiver.h"
 #include <SPI.h>      //include serial peripheral interface library
 #include <RF24.h>     //include wireless transceiver library
 #include <nRF24L01.h> //include wireless transceiver library
@@ -22,16 +23,22 @@
 #include "PinDefinitions.h"
 
 
-void setup() {
+
+const uint64_t pipe = 0xE8E8F0F0E1LL; //define the radio transmit pipe (5 Byte configurable)
+RF24 radio(PIN_CE, PIN_CSN);          //create radio object
+uint8_t data[1];                      //variable to hold transmit data
+
+
+void wirelessSetup() {
   Serial.begin(9600);//start serial communication
   radio.begin();//start radio
-  radio.setChannel(team_channel);//set the transmit and receive channels to avoid interference
+  radio.setChannel(TEAM_CHANNEL);//set the transmit and receive channels to avoid interference
   radio.openReadingPipe(1, pipe);//open up reading pipe
   radio.startListening();;//start listening for data;
   pinMode(PIN_LED_TEST, OUTPUT);//set LED pin as an output
 }
 
-void loop() {
+void wirelessRecieve() {
   while (radio.available()) {
     radio.read(&data, sizeof(data));
     digitalWrite(PIN_LED_TEST, data[0]);
