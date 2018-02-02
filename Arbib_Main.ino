@@ -11,7 +11,6 @@
 #include <TimerOne.h>
 #include "RobotDrive.h"
 #include "IRSensor.h"
-#include "PhotoSensor.h"
 #include "PinDefinitions.h"
 #include "WallFollowing.h"
 #include "WirelessReceiver.h"
