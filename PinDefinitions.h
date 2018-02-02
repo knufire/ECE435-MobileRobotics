@@ -34,8 +34,8 @@
 #define PIN_SNR_LEFT   	A12   	//front left sonar
 #define PIN_SNR_RIGHT  	A13  	//front right sonar
 #define PIN_BUTTON    	A15    	//pushbutton
-#define PIN_PHTO_LEFT	A6
-#define PIN_PHTO_RIGHT	A7
+
+/*------------------------Constants---------------------------------*/
 
 
 
