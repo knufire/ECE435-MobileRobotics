@@ -32,7 +32,7 @@
 /**
  * These are experimentally defined constants to convert motor steps to real-world units.
  */
-#define CONST_FEET_TO_STEPS 320.0
+#define CONST_FEET_TO_STEPS 880.0
 #define CONST_SPIN_DEGREES_TO_STEPS 5.635
 
 /**

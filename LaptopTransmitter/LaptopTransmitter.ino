@@ -39,11 +39,13 @@
 #define CE_PIN  7
 #define CSN_PIN 8
 #define test_LED 13
-#define team_channel 14   //transmitter and receiver on same channel between 1 & 125
+#define MAX_LEN 63		  //Serial buffer is only 64 bytes, and we need 1 for a null terminator.
+#define team_channel 37   //transmitter and receiver on same channel between 1 & 125
 
 const uint64_t pipe = 0xE8E8F0F0E1LL; //define the radio transmit pipe (5 Byte configurable)
 RF24 radio(CE_PIN, CSN_PIN);          //create radio object
-uint8_t data[1];                      //variable to hold transmit data
+char buf[MAX_LEN];
+uint8_t len;
 
 void setup() {
   Serial.begin(9600);//start serial communication
@@ -54,9 +56,20 @@ void setup() {
 
 void loop() {
   //use serial monitor to send 0 and 1 to blink LED on digital pin 13 on robot microcontroller
-  if (Serial.available() > 0) {
-    data[0] = Serial.parseInt();
-    Serial.println(data[0]);
-    radio.write(data, sizeof(data));
+  getSerialData();
+  if (len > 0) {
+	  Serial.println(buf);
+	  delay(100);
+	  radio.write(buf, len);
   }
+}
+
+void getSerialData() {
+	if(Serial.available() > 0) {
+		len = Serial.readBytesUntil(' ', buf, MAX_LEN-1);
+		buf[len] = '\0'; //Need to null terminate string
+		len++;
+	} else {
+		len = 0;
+	}
 }

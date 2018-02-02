@@ -18,14 +18,14 @@ float lastError = 0; //Previous error for derivative control
  */
 void followWall() {
 	updateWallState();
-	if (wallState != WANDER) {
-		Serial.print("\nWallBang: li_cerror ri_cerror\t");
-		Serial.print(li_cerror);
-		Serial.print("\t");
-		Serial.println(ri_cerror);
-	} else {
-		Serial.print("Random wander");
-	}
+//	if (wallState != WANDER) {
+//		Serial.print("\nWallBang: li_cerror ri_cerror\t");
+//		Serial.print(li_cerror);
+//		Serial.print("\t");
+//		Serial.println(ri_cerror);
+//	} else {
+//		Serial.print("Random wander");
+//	}
 	switch (wallState) {
 	case (FOLLOW_RIGHT):
 		Serial.println("right wall found");
@@ -68,7 +68,7 @@ void followWall() {
 	case (CENTER):
 		if (derror == 0) {
 			//Serial.println("hallway detected, drive forward");
-			forward (half_rotation);          //drive robot forward
+			forward (quarter_rotation);          //drive robot forward
 		} else {
 			//Serial.println("hallway detected: adjust turn angle based upon error");
 			//try to average the error between the left and right to CENTER the robot
@@ -82,39 +82,39 @@ void followWall() {
 			}
 		}
 		break;
-	case (RIGHT_INSIDE_CORNER):
-		Serial.print("right wall: front corner ");
-		//make left turn if wall found
-		stop();
-		pivot(-quarter_rotation, 0);
-		reverse (quarter_rotation);              //back up
-		pivot(-quarter_rotation, 1);
-		spinDegrees(-90);              //turn left
-		break;
-	case (LEFT_INSIDE_CORNER):
-		//make right turn if wall found
-		Serial.print("left wall: front corner ");
-		//make left turn if wall found
-		stop();
-		pivot(-quarter_rotation, 1);
-		reverse(quarter_rotation);              //back up
-		pivot(-quarter_rotation, 0);
-		spinDegrees(90);              //turn right
-		break;
-	case (LEFT_OUTSIDE_CORNER):
-		stop();
-		reverse(quarter_rotation);
-		spinDegrees(-90);
-		forward(one_rotation + half_rotation);
-		break;
-	case (RIGHT_OUTSIDE_CORNER):
-		stop();
-		spinDegrees(90);
-		forward(one_rotation + half_rotation);
-		break;
-	case (WANDER):
-		randomWander();
-		break;
+//	case (RIGHT_INSIDE_CORNER):
+//		Serial.print("right wall: front corner ");
+//		//make left turn if wall found
+//		stop();
+//		pivot(-quarter_rotation, 0);
+//		reverse (quarter_rotation);              //back up
+//		pivot(-quarter_rotation, 1);
+//		spinDegrees(-90);              //turn left
+//		break;
+//	case (LEFT_INSIDE_CORNER):
+//		//make right turn if wall found
+//		Serial.print("left wall: front corner ");
+//		//make left turn if wall found
+//		stop();
+//		pivot(-quarter_rotation, 1);
+//		reverse(quarter_rotation);              //back up
+//		pivot(-quarter_rotation, 0);
+//		spinDegrees(90);              //turn right
+//		break;
+//	case (LEFT_OUTSIDE_CORNER):
+//		stop();
+//		reverse(quarter_rotation);
+//		spinDegrees(-90);
+//		forward(one_rotation + half_rotation);
+//		break;
+//	case (RIGHT_OUTSIDE_CORNER):
+//		stop();
+//		spinDegrees(90);
+//		forward(one_rotation + half_rotation);
+//		break;
+//	case (WANDER):
+//		randomWander();
+//		break;
 	}
 }
 
@@ -133,20 +133,20 @@ float PDController(float error) {
  * Automatically updates the wall following state based on sensor feedback.
  */
 void updateWallState() {
-	if (flag == 0) { //no sensors triggered
-		setWallState(WANDER);
-	} else if (bitRead(flag, obRight) && !bitRead(flag, obLeft)) {
-		if (bitRead(flag, obFront)) {
-			setWallState(RIGHT_INSIDE_CORNER);
-		} else {
-			setWallState(FOLLOW_RIGHT);
-		}
+	if (bitRead(flag, obRight) && !bitRead(flag, obLeft)) {
+//		if (bitRead(flag, obFront)) {
+//			setWallState(RIGHT_INSIDE_CORNER);
+//		} else {
+//			setWallState(FOLLOW_RIGHT);
+//		}
+		setWallState(FOLLOW_RIGHT);
 	} else if (bitRead(flag, obLeft) && !bitRead(flag, obRight)) {
-		if (bitRead(flag, obFront)) {
-			setWallState(LEFT_INSIDE_CORNER);
-		} else {
-			setWallState(FOLLOW_LEFT);
-		}
+//		if (bitRead(flag, obFront)) {
+//			setWallState(LEFT_INSIDE_CORNER);
+//		} else {
+//			setWallState(FOLLOW_LEFT);
+//		}
+		setWallState(FOLLOW_LEFT);
 	} else if (bitRead(flag, obLeft) && bitRead(flag, obRight)) {
 		setWallState(CENTER);
 	}
@@ -156,42 +156,42 @@ void updateWallState() {
  * Updates the current wall state to the newState, checking for illegal state transitions and correcting them.
  */
 void setWallState(int newState) {
-	switch (wallState) {
-	case (WANDER):
-		break;
-	case (FOLLOW_LEFT):
-		if (newState == WANDER) {
-			newState = LEFT_OUTSIDE_CORNER;
-		}
-		break;
-	case (FOLLOW_RIGHT):
-		if (newState == WANDER) {
-			newState = RIGHT_OUTSIDE_CORNER;
-		}
-		break;
-	case (CENTER):
-		break;
-	case (LEFT_INSIDE_CORNER):
-		if (newState == LEFT_INSIDE_CORNER) {
-			newState = FOLLOW_LEFT;
-		}
-		break;
-	case (RIGHT_INSIDE_CORNER):
-		if (newState == RIGHT_INSIDE_CORNER) {
-			newState = FOLLOW_RIGHT;
-		}
-		break;
-	case (LEFT_OUTSIDE_CORNER):
-		if (wallState == newState) {
-			newState = WANDER;
-		}
-		break;
-	case (RIGHT_OUTSIDE_CORNER):
-		if (wallState == newState) {
-			newState = WANDER;
-		}
-		break;
-	}
+//	switch (wallState) {
+//	case (WANDER):
+//		break;
+//	case (FOLLOW_LEFT):
+//		if (newState == WANDER) {
+//			newState = LEFT_OUTSIDE_CORNER;
+//		}
+//		break;
+//	case (FOLLOW_RIGHT):
+//		if (newState == WANDER) {
+//			newState = RIGHT_OUTSIDE_CORNER;
+//		}
+//		break;
+//	case (CENTER):
+//		break;
+//	case (LEFT_INSIDE_CORNER):
+//		if (newState == LEFT_INSIDE_CORNER) {
+//			newState = FOLLOW_LEFT;
+//		}
+//		break;
+//	case (RIGHT_INSIDE_CORNER):
+//		if (newState == RIGHT_INSIDE_CORNER) {
+//			newState = FOLLOW_RIGHT;
+//		}
+//		break;
+//	case (LEFT_OUTSIDE_CORNER):
+//		if (wallState == newState) {
+//			newState = WANDER;
+//		}
+//		break;
+//	case (RIGHT_OUTSIDE_CORNER):
+//		if (wallState == newState) {
+//			newState = WANDER;
+//		}
+//		break;
+//	}
 	if (wallState != newState) {
 		initNewWallState(newState);
 	}

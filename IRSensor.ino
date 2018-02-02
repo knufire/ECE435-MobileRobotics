@@ -18,7 +18,7 @@ int irIdx = 0; //index for 5 IR readings to take the average
 
 //define sensor constants and variables
 #define irMin    2               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
-#define irMax    12              // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMax    9              // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
 
 //define error variables
 float li_curr;    //left ir current reading
@@ -142,7 +142,7 @@ void updateError() {
 	if (li_cerror < 0.5 && li_cerror > -0.5)
 		li_cerror = 0;
 	derror = li_cerror - ri_cerror; //use IR data for difference error
-	if (derror < 1.5) {
+	if (derror < 0.5 && derror > -0.5) {
 		derror = 0;
 	}
 

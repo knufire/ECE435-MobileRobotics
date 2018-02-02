@@ -7,3 +7,9 @@ sloeber.ino.cpp
 -E
 Arbib_Lab03.zip
 Arbib_Lab03.pdf
+
+LaptopTransmitter/Release/LaptopTransmitter\.elf
+
+LaptopTransmitter/Release/LaptopTransmitter\.hex
+
+LaptopTransmitter/Release/sloeber\.ino\.cpp\.o

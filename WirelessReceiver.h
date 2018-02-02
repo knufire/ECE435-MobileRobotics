@@ -12,7 +12,8 @@
 
 #define TEAM_CHANNEL 37
 
-
+void wirelessSetup();
+char* wirelessRecieve();
 
 
 #endif /* WIRELESSRECEIVER_H_ */
