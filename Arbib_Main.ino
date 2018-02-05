@@ -63,8 +63,9 @@ void setup() {
 }
 
 void loop() {
-	waitForCommand();
-	delay(1000);
+//	waitForCommand();
+//	delay(1000);
+
 }
 
 void waitForCommand() {

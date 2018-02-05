@@ -56,6 +56,8 @@ void updateIRValues() {
 	rear = analogRead(PIN_IR_REAR);
 	left = analogRead(PIN_IR_LEFT);
 	right = analogRead(PIN_IR_RIGHT);
+	//Serial.print(rear); Serial.print("\t");
+
 
 	//Add IR values to array
 	irFrontArray[irIdx] = front;
@@ -82,10 +84,10 @@ void updateIRValues() {
 	irRight = irRight / 5;
 
 	//	Convert IR values to inches based on calibration
-	irFront = (1280 / (irFront + 18)) - 0.5;
+	irFront = (1280 / (irFront + 17)) - 0.5;
 	irRear = (1100 / (irRear + 16));
-	irLeft = (3000 / (irLeft + 22)) - 2;
-	irRight = (1950 / (irRight - 34));
+	irLeft = (3000 / (irLeft + 10)) - 2.5;
+	irRight = (1950 / (irRight - 32));
 
 	//  print IR data
 	//	Serial.println("frontIR\tbackIR\tleftIR\trightIR");
@@ -93,6 +95,11 @@ void updateIRValues() {
 	//	Serial.print(irRear); Serial.print("\t");
 	//	Serial.print(irLeft); Serial.print("\t");
 	//	Serial.println(irRight);
+
+		Serial.print(left); Serial.print("\t");
+		Serial.print(right); Serial.print("\t");
+		Serial.print(front); Serial.print("\t");
+		Serial.println(rear);
 }
 
 /**
@@ -102,24 +109,24 @@ void updateObstacles() {
 	//Set obstacle flags
 	if (irRight > irMin && irRight < irMax) {
 		if (!bitRead(flag, obRight)) {
-			Serial.print("\t\tset right obstacle: ");
-			Serial.println(irRight);
+//			Serial.print("\t\tset right obstacle: ");
+//			Serial.println(irRight);
 			bitSet(flag, obRight);            //set the right obstacle
 		}
 	} else
 		bitClear(flag, obRight);          //clear the right obstacle
 	if (irLeft > irMin && irLeft < irMax) {
 		if (!bitRead(flag, obLeft)) {
-			Serial.print("\t\tset left obstacle: ");
-			Serial.println(irLeft);
+//			Serial.print("\t\tset left obstacle: ");
+//			Serial.println(irLeft);
 			bitSet(flag, obLeft);             //set the left obstacle
 		}
 	} else
 		bitClear(flag, obLeft);           //clear the left obstacle
 	if (irFront < 6) {
 		if (!bitRead(flag, obFront)) {
-			Serial.print("\t\tset front obstacle bit: ");
-			Serial.println(irFront);
+			//Serial.print("\t\tset front obstacle bit: ");
+			//Serial.println(irFront);
 			bitSet(flag, obFront);            //set the front obstacle
 		}
 	} else {
