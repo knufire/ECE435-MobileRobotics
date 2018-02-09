@@ -13,27 +13,26 @@ int world_map[4][4] = { { 0, 99, 99, 0 },
 						{ 0, 99, 99, 0 } };
 
 String getDirectionsToGoal(int startX, int startY, int goalX, int goalY) {
-	Serial.print("Start = (");
-	Serial.print(startX);
-	Serial.print(",");
-	Serial.print(startY);
-	Serial.print(")\t");
-	Serial.print("End = (");
-	Serial.print(goalX);
-	Serial.print(",");
-	Serial.print(goalY);
-	Serial.println(")");
+//	Serial.print("Start = (");
+//	Serial.print(startX);
+//	Serial.print(",");
+//	Serial.print(startY);
+//	Serial.print(")\t");
+//	Serial.print("End = (");
+//	Serial.print(goalX);
+//	Serial.print(",");
+//	Serial.print(goalY);
+//	Serial.println(")");
+	world_map[startX][startY] = 1;
 	populateMap(startX, startY);
-	//printMap();
-//	String path = getPath(goalX, goalY);
-//	return convertPathToDirections(path);
+//	printMap();
+	String path = getPath(goalX, goalY);
+	Serial.println(path);
+	return convertPathToDirections(path);
 }
 
 bool isValidNeighbor(int x, int y) {
-	if (!cellExists(x, y))
-		if (world_map[x][y] != 0)
-			return false;
-	return true;
+	return cellExists(x, y) && world_map[y][x] == 0;
 }
 
 bool cellExists(int x, int y) {
@@ -45,35 +44,37 @@ bool cellExists(int x, int y) {
 }
 
 void populateMap(int x, int y) {
-	Serial.print("Start = (");
-	Serial.print(x);
-	Serial.print(",");
-	Serial.print(y);
+//	Serial.print("Start = (");
+//	Serial.print(x);
+//	Serial.print(",");
+//	Serial.print(y);
+//	Serial.println(")");
+	//printMap();
 	//Check neighbor to the north
 	if (isValidNeighbor(x, y - 1)) {
-		world_map[x][y - 1] = world_map[x][y] + 1;
-		Serial.println("Valid neighbor north.");
+		world_map[y-1][x] = world_map[y][x] + 1;
+//		Serial.println("Valid neighbor north.");
 		populateMap(x, y - 1);
 	}
 
 	//Check neighbor to the south
 	if (isValidNeighbor(x, y + 1)) {
-		world_map[x][y + 1] = world_map[x][y] + 1;
-		Serial.println("Valid neighbor south.");
+		world_map[y+1][x] = world_map[y][x] + 1;
+//		Serial.println("Valid neighbor south.");
 		populateMap(x, y + 1);
 	}
 
 	//Check neighbor to the east
 	if (isValidNeighbor(x + 1, y)) {
-		world_map[x + 1][y] = world_map[x][y] + 1;
-		Serial.println("Valid neighbor east.");
+		world_map[y][x+1] = world_map[y][x] + 1;
+//		Serial.println("Valid neighbor east.");
 		populateMap(x + 1, y);
 	}
 
 	//Check neighbor to the west
 	if (isValidNeighbor(x - 1, y)) {
-		world_map[x - 1][y] = world_map[x][y] + 1;
-		Serial.println("Valid neighbor west.");
+		world_map[y][x-1] = world_map[y][x] + 1;
+//		Serial.println("Valid neighbor west.");
 		populateMap(x - 1, y);
 	}
 }
@@ -81,7 +82,7 @@ void populateMap(int x, int y) {
 void printMap() {
 	for (int y = 0; y < 4; y++) {
 		for (int x = 0; x < 4; x++) {
-			Serial.print(world_map[x][y]);
+			Serial.print(world_map[y][x]);
 			Serial.print("\t");
 		}
 		Serial.println();
@@ -89,40 +90,44 @@ void printMap() {
 }
 
 String getPath(int x, int y) {
-	int smallestValue = world_map[x][y];
+	int smallestValue = world_map[y][x];
 	int smallestNeighbor = -1;
 
-	if (smallestValue == 0) return "";
+	if (smallestValue == 1) return "";
 
 	//Check neighbor to the north
 	if (cellExists(x, y-1)) {
-		if (world_map[x][y - 1] < smallestValue) {
+		if (world_map[y-1][x] < smallestValue) {
+//			Serial.println("Neighbor north smaller");
 			smallestNeighbor = NORTH;
-			smallestValue = world_map[x][y - 1];
+			smallestValue = world_map[y-1][x];
 		}
 	}
 
 	//Check neighbor to the south
 	if (cellExists(x, y+1)) {
-		if (world_map[x][y+1] < smallestValue) {
+		if (world_map[y+1][x] < smallestValue) {
+//			Serial.println("Neighbor south smaller");
 			smallestNeighbor = SOUTH;
-			smallestValue = world_map[x][y+1];
+			smallestValue = world_map[y+1][x];
 		}
 	}
 
 	//Check neighbor to the east
 	if (cellExists(x+1, y)) {
-		if (world_map[x+1][y] < smallestValue) {
+		if (world_map[y][x+1] < smallestValue) {
+//			Serial.println("Neighbor east smaller");
 			smallestNeighbor = EAST;
-			smallestValue = world_map[x+1][y];
+			smallestValue = world_map[y][x+1];
 		}
 	}
 
 	//Check neighbor to the west
 	if (cellExists(x-1, y)) {
-		if (world_map[x-1][y] < smallestValue) {
+		if (world_map[y][x-1] < smallestValue) {
+//			Serial.println("Neighbor west smaller");
 			smallestNeighbor = WEST;
-			smallestValue = world_map[x-1][y];
+			smallestValue = world_map[y][x-1];
 		}
 	}
 

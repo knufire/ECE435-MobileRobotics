@@ -96,10 +96,10 @@ void updateIRValues() {
 	//	Serial.print(irLeft); Serial.print("\t");
 	//	Serial.println(irRight);
 
-		Serial.print(left); Serial.print("\t");
-		Serial.print(right); Serial.print("\t");
-		Serial.print(front); Serial.print("\t");
-		Serial.println(rear);
+//		Serial.print(left); Serial.print("\t");
+//		Serial.print(right); Serial.print("\t");
+//		Serial.print(front); Serial.print("\t");
+//		Serial.println(rear);
 }
 
 /**

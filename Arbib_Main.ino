@@ -61,11 +61,12 @@ void setup() {
 	Timer1.attachInterrupt(updateSensors); // attaches updateSensors() as a timer overflow interrupt
 	receivedCommand = NULL;
 
+	parsedCommand = getDirectionsToGoal(0, 0, 3, 2);
+	executeCommands();
 }
 
 void loop() {
-	getDirectionsToGoal(0, 0, 2, 3);
-	delay(1000);
+
 }
 
 void waitForCommand() {
