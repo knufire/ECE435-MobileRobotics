@@ -14,6 +14,7 @@
 #include "PinDefinitions.h"
 #include "WallFollowing.h"
 #include "WirelessReceiver.h"
+#include "MetricPathPlanning.h"
 
 #define baud_rate 9600//set serial communication baud rate
 
@@ -59,13 +60,12 @@ void setup() {
 	Timer1.initialize(timer_int); // initialize timer1, and set a period in microseconds
 	Timer1.attachInterrupt(updateSensors); // attaches updateSensors() as a timer overflow interrupt
 	receivedCommand = NULL;
-	delay(1500);  //wait 3 seconds before robot moves
+
 }
 
 void loop() {
-//	waitForCommand();
-//	delay(1000);
-
+	getDirectionsToGoal(0, 0, 2, 3);
+	delay(1000);
 }
 
 void waitForCommand() {
