@@ -6,6 +6,8 @@
  */
 
 #include "MetricPathPlanning.h"
+#include "WirelessReceiver.h"
+#include "RobotDrive.h"
 
 int world_map[4][4] = { { 0, 99, 99, 0 },
 						{ 0, 0,  0,  0 },
@@ -25,10 +27,18 @@ String getDirectionsToGoal(int startX, int startY, int goalX, int goalY) {
 //	Serial.println(")");
 	world_map[startX][startY] = 1;
 	populateMap(startX, startY);
-//	printMap();
+	printMap();
 	String path = getPath(goalX, goalY);
 	Serial.println(path);
-	return convertPathToDirections(path);
+	spinToDirection(path.charAt(0));
+	String directions = convertPathToDirections(path);
+	return directions;
+}
+
+void spinToDirection(char c) {
+	if (c == 'S') spinDegrees(180);
+	if (c == 'E') spinDegrees(-90);
+	if (c == 'W') spinDegrees(90);
 }
 
 bool isValidNeighbor(int x, int y) {
@@ -80,12 +90,15 @@ void populateMap(int x, int y) {
 }
 
 void printMap() {
+
 	for (int y = 0; y < 4; y++) {
+		String output = "";
 		for (int x = 0; x < 4; x++) {
-			Serial.print(world_map[y][x]);
-			Serial.print("\t");
+			output += (world_map[y][x]);
+			output += "\t";
 		}
-		Serial.println();
+		wirelessSend(output);
+		delay(100);
 	}
 }
 

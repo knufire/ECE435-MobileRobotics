@@ -12,9 +12,11 @@
 
 #define TEAM_CHANNEL 37
 
+#include "Arduino.h"
+
 void wirelessSetup();
 char* wirelessRecieve();
-
+void wirelessSend(String str);
 
 #endif /* WIRELESSRECEIVER_H_ */
 

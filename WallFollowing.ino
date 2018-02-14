@@ -124,7 +124,9 @@ void followWall() {
 float PDController(float error) {
 	float kp = 100;
 	float kd = 20;
-	float output = kp * error - kd * (error - lastError);
+	float d = kd * fabs(error - lastError);
+	float sign = error > 0 ? 1.0 : -1.0;
+	float output = kp * error + (d*sign*-1);
 	lastError = error;
 	return output;
 }

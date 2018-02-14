@@ -52,6 +52,8 @@ void setup() {
   radio.begin();//start radio
   radio.setChannel(team_channel);//set the transmit and receive channels to avoid interference
   radio.openWritingPipe(pipe);//open up writing pipe
+  radio.openReadingPipe(1, pipe);
+  radio.startListening();
 }
 
 void loop() {
@@ -60,8 +62,16 @@ void loop() {
   if (len > 0) {
 	  Serial.println(buf);
 	  delay(100);
+	  radio.stopListening();
 	  radio.write(buf, len);
+	  radio.startListening();
   }
+  if (radio.available()) {
+	  	char buf[128];
+  		radio.read(buf, 128);
+  		Serial.println(buf);
+  }
+
 }
 
 void getSerialData() {

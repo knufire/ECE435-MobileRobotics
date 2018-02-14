@@ -61,13 +61,17 @@ void setup() {
 	Timer1.attachInterrupt(updateSensors); // attaches updateSensors() as a timer overflow interrupt
 	receivedCommand = NULL;
 
-	parsedCommand = getDirectionsToGoal(0, 0, 3, 2);
+	parsedCommand = getDirectionsToGoal(1, 1, 3, 0);
+	Serial.println(parsedCommand);
+	delay(100);
+	wirelessSend(parsedCommand);
 	executeCommands();
 }
 
 void loop() {
 
 }
+
 
 void waitForCommand() {
 	if (receivedCommand == NULL) {
@@ -87,7 +91,11 @@ void executeCommands() {
 		switch (command) {
 		case 'S':
 			Serial.println("-------COMMAND: STRAIGHT----------");
-			executeMove(STRAIGHT);
+			if (parsedCommand.charAt(i+1) == 'T') {
+				forward(two_rotation);
+			} else {
+				executeMove(STRAIGHT);
+			}
 			break;
 		case 'L':
 			Serial.println("-------COMMAND: LEFT----------");

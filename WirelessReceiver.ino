@@ -14,6 +14,7 @@
  GND GND
  */
 
+#include "Arduino.h"
 #include "WirelessReceiver.h"
 #include <SPI.h>      //include serial peripheral interface library
 #include <RF24.h>     //include wireless transceiver library
@@ -29,9 +30,9 @@ char command[64];                      //variable to hold transmit data
 void wirelessSetup() {
 	radio.begin();                      //start radio
 	radio.setChannel(TEAM_CHANNEL); //set the transmit and receive channels to avoid interference
-	radio.openReadingPipe(1, pipe);                      //open up reading pipe
-	radio.startListening();
-	;                      //start listenin	g for data;
+	radio.openReadingPipe(1, pipe); //open up reading pipe
+	radio.openWritingPipe(pipe);
+	radio.startListening();			//start listenin	g for data;
 }
 
 char* wirelessRecieve() {
@@ -40,4 +41,13 @@ char* wirelessRecieve() {
 		return command;
 	}
 	return NULL;
+}
+
+void wirelessSend(String str) {
+	char buf[str.length()+1];
+	str.toCharArray(buf, str.length());
+	buf[str.length()] = '\0';
+	radio.stopListening();
+	radio.write(buf, str.length());
+	radio.startListening();
 }

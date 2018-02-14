@@ -21,7 +21,6 @@ MultiStepper steppers; //create instance to control multiple steppers at the sam
  */
 
 void driveSetup() {
-	Serial.println("Setting up drive");
 
 	pinMode(PIN_RT_STEP, OUTPUT); //sets pin as outputr
 	pinMode(PIN_RT_DIR, OUTPUT); //sets pin as output
