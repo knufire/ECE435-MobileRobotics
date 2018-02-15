@@ -15,6 +15,7 @@
 #include "WallFollowing.h"
 #include "WirelessReceiver.h"
 #include "MetricPathPlanning.h"
+#include "RobotLocalization.h"
 
 #define baud_rate 9600//set serial communication baud rate
 
@@ -39,6 +40,7 @@ char* receivedCommand;
 String parsedCommand;
 
 void setup() {
+	Serial.println("Setting up...");
 	//Serial setup
 	Serial.begin(baud_rate); //start serial communication in order to debug the software while coding
 
@@ -61,14 +63,19 @@ void setup() {
 	Timer1.attachInterrupt(updateSensors); // attaches updateSensors() as a timer overflow interrupt
 	receivedCommand = NULL;
 
-	parsedCommand = getDirectionsToGoal(1, 1, 3, 0);
-	Serial.println(parsedCommand);
-	delay(100);
-	wirelessSend(parsedCommand);
-	executeCommands();
+//	parsedCommand = getDirectionsToGoal(0, 0, 3, 0);
+//	Serial.println(parsedCommand);
+//	delay(100);
+//	wirelessSend(parsedCommand);
+//	executeCommands();
+
+	delay(1000);
+	localize();
+
 }
 
 void loop() {
+	delay(1000);
 
 }
 

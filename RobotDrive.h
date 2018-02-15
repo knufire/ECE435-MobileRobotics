@@ -14,8 +14,8 @@
 /**
  * These constants define kinematic traits of the robot, to be used by the AccelStepper library.
  */
-#define robot_spd 	400 	//Desired robot speed in steps/s
-#define max_accel 	5000	//Maximum robot acceleration in steps/s^2
+#define robot_spd 	200 	//Desired robot speed in steps/s
+#define max_accel 	1000	//Maximum robot acceleration in steps/s^2
 #define max_spd 	1000	//Maximum robot speed in steps/s
 
 /**
@@ -73,11 +73,6 @@ void stop();
 void reverse(int rot);
 
 /**
- * Moves the robot to a specified angle. The robot's angle is 0 during startup.
- */
-void goToAngle(float degrees);
-
-/**
  * Blocks program execution until stepper movements have been completed.
  */
 void runToStop();
@@ -96,10 +91,5 @@ void setSpeed(int leftSpeed, int rightSpeed);
  * Runs both wheels at constant speed. Blocks for the specified number of milliseconds.
  */
 void runSpeed(unsigned int ms);
-
-/**
- * Drives towards a goal location using odometry.
- */
-bool goToGoal(int goalX, int goalY);
 
 #endif /* ROBOTDRIVE_H_ */

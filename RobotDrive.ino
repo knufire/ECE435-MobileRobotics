@@ -46,16 +46,13 @@ void forward(int rot) {
 	stepperRight.move(rot);	//move right motor to position
 	stepperLeft.move(rot); 	//move left motor to position
 	runToStop();   			//run until the robot reaches the target
-	updateRobotPosition(rot, rot);
 }
 
 void pivot(int rot, int dir) {
 	if (dir > 0) {
 		stepperLeft.move(rot);
-		updateRobotPosition(rot, 0);
 	} else {
 		stepperRight.move(rot);
-		updateRobotPosition(0, rot);
 	}
 	runToStop();
 	//TODO: Update robot postition variables.
@@ -65,7 +62,6 @@ void spin(int rot) {
 	stepperRight.move(-rot);
 	stepperLeft.move(rot);
 	runToStop();
-	updateRobotPosition(rot, -rot);
 }
 
 void stop() {
@@ -83,21 +79,6 @@ void spinDegrees(float degrees) {
 	spin(numSteps);
 }
 
-void goToAngle(float degrees) {
-	//Use the robot's current angle to figure out the needed change in angle
-	float robotAngle = robotPose(2) / PI * 180;
-	float dAngle = degrees - robotAngle;
-
-	//Ensure the change in angle is between -180 and 180 for the shortest spin possible
-	while (dAngle > 180) {
-		dAngle = dAngle - 360;
-	}
-	while (dAngle < -180) {
-		dAngle = dAngle + 360;
-	}
-	spinDegrees(dAngle);
-
-}
 
 void runToStop(void) {
 	steppers.runSpeedToPosition();
@@ -119,55 +100,11 @@ void runSpeed(unsigned int ms) {
 	}
 	leftPos = stepperLeft.currentPosition() - leftPos;
 	rightPos = stepperRight.currentPosition() - rightPos;
-	updateRobotPosition(leftPos, rightPos);
 }
 
 void randomWander() {
 	int randomAngle = random(0, 360);
 	spinDegrees((random(0, 1) ? -1 : 1) * randomAngle);
 	forward((random(0, 1) ? -1 : 1) * half_rotation);
-}
-
-bool goToGoal(int goalX, int goalY) {
-	//Get current robot pose
-	float robotX = robotPose(0);
-	float robotY = robotPose(1);
-	float robotAngle = robotPose(2);
-
-	//Get vector towards the current goal
-	float goalAngle = atan2((goalY - robotY), (goalX - robotX));
-	float robotRadAngle = robotAngle * PI / 180;
-	float dAngle = goalAngle - robotRadAngle;
-
-	//Find obstacles and add vectors to avoid them.
-	float obstacleX = cos(dAngle);
-	float obstacleY = sin(dAngle);
-	int multiplier = 1;
-	if (bitRead(flag, obFront)) {
-		forward(-1 * half_rotation);
-		multiplier = 2;
-		obstacleX--;
-	}
-	if (bitRead(flag, obRear)) {
-		multiplier = 2;
-		obstacleX++;
-	}
-	if (bitRead(flag, obLeft)) {
-		multiplier = 2;
-		obstacleY++;
-	}
-	if (bitRead(flag, obRight)) {
-		obstacleY--;
-		multiplier = 2;
-	}
-
-	//Calculate angle resulting from vector sum.
-	float angleInRad = atan2(obstacleY, obstacleX);
-	float angleInDeg = angleInRad / PI * 180;
-	goToAngle(angleInDeg + robotAngle);
-	forward(quarter_rotation * multiplier);
-
-	//Return whether the robot is close enough to the goal.
-	return (abs(robotX - goalX) < 0.25 && abs(robotY - goalY) < 0.25);
 }
 

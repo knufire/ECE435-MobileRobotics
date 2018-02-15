@@ -17,10 +17,10 @@ int irLeftArray[5] = { 0, 0, 0, 0, 0 }; //array to hold 5 left IR readings
 int irIdx = 0; //index for 5 IR readings to take the average
 
 //define sensor constants and variables
-#define irMin    2               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
-#define irMax    9              // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMin    0               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMax    7              // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
 
-//define error variables
+//define error variablesS
 float li_curr;    //left ir current reading
 float ri_curr;    //right ir current reading
 
@@ -89,12 +89,12 @@ void updateIRValues() {
 	irLeft = (3000 / (irLeft + 10)) - 2.5;
 	irRight = (1950 / (irRight - 32));
 
-	//  print IR data
-	//	Serial.println("frontIR\tbackIR\tleftIR\trightIR");
-	//	Serial.print(irFront); Serial.print("\t");
-	//	Serial.print(irRear); Serial.print("\t");
-	//	Serial.print(irLeft); Serial.print("\t");
-	//	Serial.println(irRight);
+//	  print IR data
+//		Serial.println("frontIR\tbackIR\tleftIR\trightIR");
+//		Serial.print(irFront); Serial.print("\t");
+//		Serial.print(irRear); Serial.print("\t");
+//		Serial.print(irLeft); Serial.print("\t");
+//		Serial.println(irRight);
 
 //		Serial.print(left); Serial.print("\t");
 //		Serial.print(right); Serial.print("\t");
@@ -123,7 +123,7 @@ void updateObstacles() {
 		}
 	} else
 		bitClear(flag, obLeft);           //clear the left obstacle
-	if (irFront < 6) {
+	if (irFront > irMin && irFront < irMax+4) {
 		if (!bitRead(flag, obFront)) {
 			//Serial.print("\t\tset front obstacle bit: ");
 			//Serial.println(irFront);
@@ -132,6 +132,16 @@ void updateObstacles() {
 	} else {
 		bitClear(flag, obFront);          //clear the front obstacle
 	}
+	if (irRear > irMin && irRear < irMax) {
+		if (!bitRead(flag, obRear)) {
+			//Serial.print("\t\tset front obstacle bit: ");
+			//Serial.println(irFront);
+			bitSet(flag, obRear);            //set the front obstacle
+		}
+	} else {
+		bitClear(flag, obRear);          //clear the front obstacle
+	}
+//	Serial.println(flag);
 }
 
 /**

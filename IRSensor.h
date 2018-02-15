@@ -11,8 +11,8 @@
 
 //bit definitions for sensor data flag byte
 #define obFront   0 // Front IR trip
-#define obRear    1 // Rear IR trip
-#define obRight   2 // Right IR trip
+#define obRear    2 // Rear IR trip
+#define obRight   1 // Right IR trip
 #define obLeft    3 // Left IR trip
 
 extern float li_cerror;    //left ir current error

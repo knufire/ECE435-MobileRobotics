@@ -8,17 +8,22 @@
 #ifndef ROBOTLOCALIZATION_H_
 #define ROBOTLOCALIZATION_H_
 
-#include <BasicLinearAlgebra.h>
-
-using namespace BLA;
-
-extern BLA::Matrix<3> robotPose;
-
 #define WHEELBASE_LENGTH = 8.5;
+#define n 16
 
-/**
- * Updates the robot pose based on the number of steps each wheel has spun.
- */
-void updateRobotPosition(int leftSteps, int rightSteps);
+struct Cell {
+    int x;
+    int y;
+};
+
+struct Cell cells[n];
+
+//bitDefinitions
+#define NORTH 0
+#define EAST 1
+#define SOUTH 2
+#define WEST 3
+
+void localize();
 
 #endif /* ROBOTLOCALIZATION_H_ */

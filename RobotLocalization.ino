@@ -9,128 +9,198 @@
 
 #include "RobotLocalization.h"
 #include "RobotDrive.h"
-#include <BasicLinearAlgebra.h>
 
-using namespace BLA;
+int numPossibilities = 0;
+int currentDirection = NORTH;
 
-Matrix<3> robotPose;
 
-/**
- * Updates the robot pose based on the number of steps each wheel has spun.
- */
-void updateRobotPosition(int leftSteps, int rightSteps) {
-	float vl = leftSteps / CONST_FEET_TO_STEPS;
-	float vr = rightSteps / CONST_FEET_TO_STEPS;
+int wall_map[4][4] = { { 11, 15, 15, 11 },
+						{ 8, 5, 5, 2 },
+						{ 10, 15, 15, 10 },
+						{ 14, 15, 15, 14 } };
 
-	Serial.print(vl);
-	Serial.print("\t");
-	Serial.print(vr);
-
-	//Edge case: robot isn't moving
-	if (vl == 0 && vr == 0) {
-		//Do nothing
-	}
-
-	//Edge case: robot is moving straight
-	else if (fabs(vl - vr) < 0.01) {
-		updatePositionStraight(vl, vr);
-	}
-
-	//Edge case: robot is spinning
-	else if (fabs(fabs(vl) - fabs(vr)) < 0.01) {
-		updatePostionSpin(vl, vr);
-		return;
-	}
-
-	//No edge cases, use forward kinematics
-	else {
-		updatePositionGeneral(vl, vr);
-	}
-
-	clampAngle();
-	printPose();
-}
-
-/**
- * Update the robot pose using the specified left and right wheel velocities.
- * Assumes the robot is driving in a straight line.
- */
-void updatePositionStraight(float vl, float vr) {
-	float dx = vl * cos(robotPose(2));
-	float dy = vl * sin(robotPose(2));
-	robotPose(0) = robotPose(0) + dx;
-	robotPose(1) = robotPose(1) + dy;
-}
-
-/**
- * Update the robot pose using the specified left and right wheel velocities.
- * Assuems the robot is performing a spin about the center of the robot.
- */
-void updatePostionSpin(float vl, float vr) {
-	float w = (vr - vl) / 2;
-	robotPose(2) = robotPose(2) + w;
-}
-
-/**
- * Update the robot pose using the specified left and right wheel velocities.
- * Uses a differential drive foward kinematic model.
- */
-void updatePositionGeneral(float vl, float vr) {
-	//Calculate angular velocity
-	float w = (vr - vl) / 2;
-
-	//Calculate radius of curvature
-	float r = ((8.5 / 12) / 2) * (vl + vr) / (vr - vl);
-
-	//Get current pose
-	float x = robotPose(0);
-	float y = robotPose(1);
-	float theta = robotPose(2);
-
-	//Find coordinates of instantaneous center of rotation
-	float ICCx = x - r * sin(theta);
-	float ICCy = y + r * cos(theta);
-
-	//Calculate new pose
-	Matrix<3, 3> M;
-	M << cos(w), -sin(w), 0,
-		 sin(w), cos(w), 0,
-		 0, 0, 1;
-
-	Matrix<3> X;
-	X << x - ICCx,
-		 y - ICCy,
-		 theta;
-
-	Matrix<3> B;
-	B << ICCx,
-		 ICCy,
-		 w;
-
-	robotPose = M * X + B;
-}
-
-/**
- * Ensure the robot angle is within (0,2*PI).
- */
-void clampAngle() {
-	while (robotPose(2) > 2 * PI) {
-		robotPose(2) = robotPose(2) - 2 * PI;
-	}
-	while (robotPose(2) < 0) {
-		robotPose(2) = robotPose(2) + 2 * PI;
+void localize() {
+	addAllPossibilites();
+	while (numPossibilities > 1) {
+		Serial.print("Value here: ");
+		Serial.println(getCurrentValue());
+		updatePossibilties();
+		delay(1000);
+		Serial.print("Num Possibilities: ");
+		Serial.println(numPossibilities);
+		if (numPossibilities <= 1) break;
+		int ob = getCurrentValue();
+		if (!bitRead(ob, NORTH)) {
+			moveNorth();
+		} else if (!bitRead(ob, EAST)) {
+			moveEast();
+		} else if (!bitRead(ob, WEST)) {
+			moveWest();
+		} else if (!bitRead(ob, SOUTH)) {
+			moveSouth();
+		}
 	}
 }
 
-/**
- * Print the current robot pose to the serial monitor.
- */
-void printPose() {
-	Serial.print("X: ");
-	Serial.print(robotPose(0));
-	Serial.print("\tY: ");
-	Serial.print(robotPose(1));
-	Serial.print("\tT: ");
-	Serial.println(robotPose(2) / PI * 180);
+void moveNorth() {
+	Serial.println("Moving north.");
+	turnTo(NORTH);
+	forward(1360);
+	for (int i = 0; i < n; i++) {
+		cells[i].y = cells[i].y - 1;
+	}
+}
+
+void moveSouth() {
+	Serial.println("Moving south.");
+	turnTo(SOUTH);
+	forward(1360);
+	for (int i = 0; i < n; i++) {;
+		cells[i].y = cells[i].y + 1;
+	}
+}
+
+void moveEast() {
+	Serial.println("Moving east.");
+	turnTo(EAST);
+	forward(1360);
+	for (int i = 0; i < n; i++) {
+		cells[i].x = cells[i].x + 1;
+	}
+}
+
+void moveWest() {
+	Serial.println("Moving west.");
+	turnTo(WEST);
+	forward(1360);
+	for (int i = 0; i < n; i++) {
+		cells[i].x = cells[i].x - 1;
+	}
+}
+
+void turnTo(int dir) {
+	switch (currentDirection) {
+	case (NORTH):
+		switch (dir) {
+		case (NORTH):
+			break;
+		case (SOUTH):
+			spinDegrees(180);
+			break;
+			;
+		case (EAST):
+			spinDegrees(-90);
+			break;
+		case (WEST):
+			spinDegrees(90);
+			break;
+		}
+		break;
+	case (SOUTH):
+		switch (dir) {
+		case (NORTH):
+			spinDegrees(180);
+			break;
+		case (SOUTH):
+			break;
+		case (EAST):
+			spinDegrees(90);
+			break;
+		case (WEST):
+			spinDegrees(-90);
+			break;
+		}
+		break;
+	case (EAST):
+		switch (dir) {
+		case (NORTH):
+			spinDegrees(90);
+			break;
+		case (SOUTH):
+			spinDegrees(-90);
+			break;
+		case (EAST):
+			break;
+		case (WEST):
+			spinDegrees(180);
+			break;
+		}
+		break;
+	case (WEST):
+		switch (dir) {
+		case (NORTH):
+			spinDegrees(90);
+			break;
+		case (SOUTH):
+			spinDegrees(-90);
+			break;
+		case (EAST):
+			spinDegrees(180);
+			break;
+		case (WEST):
+			break;
+		}
+		break;
+	}
+	currentDirection = dir;
+}
+
+void updatePossibilties() {
+	numPossibilities = 0;
+	Serial.println("------POSSIBILITIES-------");
+	for (int i = 0; i < n; i++) {
+		int valueAtCell = wall_map[cells[i].y][cells[i].x];
+		if (valueAtCell == getCurrentValue()) {
+			Serial.print("(");
+			Serial.print(cells[i].x);
+			Serial.print(",");
+			Serial.print(cells[i].y);
+			Serial.println(")");
+			numPossibilities++;
+		} else {
+			cells[i].x = -1;
+			cells[i].y = -1;
+		}
+	}
+}
+
+int getCurrentValue() {
+	//Find north bit
+	int value = 0;
+	switch (currentDirection) {
+	case (NORTH):
+		value = flag;
+		break;
+	case (SOUTH):
+		bitWrite(value, NORTH, bitRead(flag, obRear));
+		bitWrite(value, SOUTH, bitRead(flag, obFront));
+		bitWrite(value, EAST, bitRead(flag, obLeft));
+		bitWrite(value, WEST, bitRead(flag, obRight));
+		break;
+	case (EAST):
+		bitWrite(value, NORTH, bitRead(flag, obLeft));
+		bitWrite(value, SOUTH, bitRead(flag, obRight));
+		bitWrite(value, EAST, bitRead(flag, obFront));
+		bitWrite(value, WEST, bitRead(flag, obRear));
+		break;
+	case (WEST):
+		bitWrite(value, NORTH, bitRead(flag, obRight));
+		bitWrite(value, SOUTH, bitRead(flag, obLeft));
+		bitWrite(value, EAST, bitRead(flag, obRear));
+		bitWrite(value, WEST, bitRead(flag, obFront));
+		break;
+	}
+	return value;
+}
+
+void addAllPossibilites() {
+	numPossibilities = 0;
+	for (int y = 0; y < 4; y++) {
+		for (int x = 0; x < 4; x++) {
+			cells[numPossibilities].x = x;
+			cells[numPossibilities].y = y;
+			numPossibilities++;
+		}
+	}
 }
 
