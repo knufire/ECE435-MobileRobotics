@@ -15,8 +15,8 @@
  * These constants define kinematic traits of the robot, to be used by the AccelStepper library.
  */
 #define robot_spd 	200 	//Desired robot speed in steps/s
-#define max_accel 	1000	//Maximum robot acceleration in steps/s^2
-#define max_spd 	1000	//Maximum robot speed in steps/s
+#define max_accel 	3000	//Maximum robot acceleration in steps/s^2
+#define max_spd 	500	//Maximum robot speed in steps/s
 
 /**
  * These constants are the number of motor steps for the specified number of rotations.
@@ -33,7 +33,7 @@
  * These are experimentally defined constants to convert motor steps to real-world units.
  */
 #define CONST_FEET_TO_STEPS 880.0
-#define CONST_SPIN_DEGREES_TO_STEPS 5.635
+#define CONST_SPIN_DEGREES_TO_STEPS 5.45
 
 /**
  * Contains the initalizaiton routines for the stepper motor drivers and the AccelStepper library.

@@ -39,6 +39,8 @@ volatile int robotState;
 char* receivedCommand;
 String parsedCommand;
 
+int startX, startY;
+
 void setup() {
 	Serial.println("Setting up...");
 	//Serial setup
@@ -70,34 +72,42 @@ void setup() {
 //	executeCommands();
 
 	delay(1000);
-	localize();
+	makeMap();
+//	int startPoint = localize();
+//	startX = startPoint/10;
+//	startY = startPoint%10;
+//	wirelessSend("At: (" + String(startX) + "," + String(startY) +")\t");
+//	waitForCommand();
+//	int endPoint = parsedCommand.toInt();
+//	int x = endPoint/10;
+//	int y = endPoint%10;
+//	parsedCommand = getDirectionsToGoal(startX, startY, x, y);
+//	wirelessSend(parsedCommand);
+//	executeCommands();
 
 }
 
 void loop() {
-	delay(1000);
 
 }
 
 
 void waitForCommand() {
-	if (receivedCommand == NULL) {
-		Serial.println("WAITING FOR COMMAND");
+	wirelessSend("WAITING FOR COMMAND");
+	while (receivedCommand == NULL) {
+		delay(1000);
 		receivedCommand = wirelessRecieve();
 		parsedCommand = String(receivedCommand);
 		Serial.println(parsedCommand);
-		executeCommands();
-		receivedCommand = NULL;
 	}
 }
 
 void executeCommands() {
-	char desiredMove = -1;
 	for (int i = 0; i < parsedCommand.length(); i++) {
 		char command = parsedCommand.charAt(i);
 		switch (command) {
 		case 'S':
-			Serial.println("-------COMMAND: STRAIGHT----------");
+			wirelessSend("-------COMMAND: STRAIGHT----------");
 			if (parsedCommand.charAt(i+1) == 'T') {
 				forward(two_rotation);
 			} else {
@@ -105,17 +115,17 @@ void executeCommands() {
 			}
 			break;
 		case 'L':
-			Serial.println("-------COMMAND: LEFT----------");
+			wirelessSend("-------COMMAND: LEFT----------");
 			executeMove(LEFT);
 			break;
 		case 'R':
-			Serial.println("-------COMMAND: RIGHT----------");
+			wirelessSend("-------COMMAND: RIGHT----------");
 			executeMove(RIGHT);
 			break;
 		case 'T':
-			Serial.println("-------COMMAND: STOP----------");
+			wirelessSend("-------COMMAND: STOP----------");
 			executeMove(TERMINATE);
-			break;
+			return;
 		}
 
 	}
@@ -153,13 +163,6 @@ void followUntilChange() {
 	}
 }
 
-void forwardUntilChange() {
-	char leftState = bitRead(flag, obLeft);
-	char rightState = bitRead(flag, obRight);
-	while ((leftState == bitRead(flag, obLeft)) && (rightState == bitRead(flag, obRight))) {
-		forward(quarter_rotation);
-	}
-}
 
 bool moveForward() {
 	if (bitRead(flag, obFront)) {
@@ -181,7 +184,7 @@ bool moveLeft() {
 	} else {
 		Serial.print("Moving Left!");
 		reverse(quarter_rotation);
-		pivot(90*CONST_SPIN_DEGREES_TO_STEPS*1.9, 0);
+		pivot(90*CONST_SPIN_DEGREES_TO_STEPS*1.95, 0);
 		forward(one_rotation + quarter_rotation);
 		return true;
 	}
@@ -195,7 +198,7 @@ bool moveRight() {
 	} else {
 		Serial.print("Moving right!");
 		reverse(quarter_rotation);
-		pivot(90*CONST_SPIN_DEGREES_TO_STEPS*1.9, 1);
+		pivot(90*CONST_SPIN_DEGREES_TO_STEPS*1.95, 1);
 		forward(one_rotation + quarter_rotation);
 		return true;
 	}

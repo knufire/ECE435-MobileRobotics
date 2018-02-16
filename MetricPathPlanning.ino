@@ -1,5 +1,5 @@
 /*
- * MetricPathPlanning.c
+ * MetricPathPlanning.ino
  *
  *  Created on: Feb 9, 2018
  *      Author: Rahul
@@ -25,7 +25,7 @@ String getDirectionsToGoal(int startX, int startY, int goalX, int goalY) {
 //	Serial.print(",");
 //	Serial.print(goalY);
 //	Serial.println(")");
-	world_map[startX][startY] = 1;
+	world_map[startY][startX] = 1;
 	populateMap(startX, startY);
 	printMap();
 	String path = getPath(goalX, goalY);
@@ -39,6 +39,9 @@ void spinToDirection(char c) {
 	if (c == 'S') spinDegrees(180);
 	if (c == 'E') spinDegrees(-90);
 	if (c == 'W') spinDegrees(90);
+	if (!bitRead(flag, obRight) && !bitRead(flag, obLeft)) {
+		forward(one_rotation + half_rotation);
+	}
 }
 
 bool isValidNeighbor(int x, int y) {
@@ -90,7 +93,6 @@ void populateMap(int x, int y) {
 }
 
 void printMap() {
-
 	for (int y = 0; y < 4; y++) {
 		String output = "";
 		for (int x = 0; x < 4; x++) {

@@ -44,6 +44,7 @@ char* wirelessRecieve() {
 }
 
 void wirelessSend(String str) {
+	Serial.println(str);
 	char buf[str.length()+1];
 	str.toCharArray(buf, str.length());
 	buf[str.length()] = '\0';

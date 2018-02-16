@@ -11,6 +11,8 @@
 #define WHEELBASE_LENGTH = 8.5;
 #define n 16
 
+extern int currentDirection;
+
 struct Cell {
     int x;
     int y;
@@ -24,6 +26,10 @@ struct Cell cells[n];
 #define SOUTH 2
 #define WEST 3
 
-void localize();
+int localize();
+void moveNorth();
+void moveSouth();
+void moveEast();
+void moveWest();
 
 #endif /* ROBOTLOCALIZATION_H_ */

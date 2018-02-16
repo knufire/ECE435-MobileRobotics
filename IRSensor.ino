@@ -18,7 +18,7 @@ int irIdx = 0; //index for 5 IR readings to take the average
 
 //define sensor constants and variables
 #define irMin    0               // IR minimum threshold for wall (use a deadband of 4 to 6 inches)
-#define irMax    7              // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
+#define irMax    9              // IR maximum threshold for wall (use a deadband of 4 to 6 inches)
 
 //define error variablesS
 float li_curr;    //left ir current reading
@@ -85,7 +85,7 @@ void updateIRValues() {
 
 	//	Convert IR values to inches based on calibration
 	irFront = (1280 / (irFront + 17)) - 0.5;
-	irRear = (1100 / (irRear + 16));
+	irRear = (1150 / (irRear + 17));
 	irLeft = (3000 / (irLeft + 10)) - 2.5;
 	irRight = (1950 / (irRight - 32));
 

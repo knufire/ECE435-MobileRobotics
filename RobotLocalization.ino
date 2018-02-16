@@ -19,7 +19,7 @@ int wall_map[4][4] = { { 11, 15, 15, 11 },
 						{ 10, 15, 15, 10 },
 						{ 14, 15, 15, 14 } };
 
-void localize() {
+int localize() {
 	addAllPossibilites();
 	while (numPossibilities > 1) {
 		Serial.print("Value here: ");
@@ -40,6 +40,16 @@ void localize() {
 			moveSouth();
 		}
 	}
+	for (int i = 0; i < n; i++) {
+		if (cells[i].x != -1) {
+			turnTo(NORTH);
+			return 10*cells[i].x + cells[i].y;
+		}
+	}
+	turnTo(NORTH);
+	return 0;
+
+
 }
 
 void moveNorth() {
