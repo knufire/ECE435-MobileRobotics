@@ -12,6 +12,7 @@
 
 #include "Arduino.h"
 
+//Enum for directions
 #define NORTH 0
 #define EAST 1
 #define SOUTH 2

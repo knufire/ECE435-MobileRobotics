@@ -1,11 +1,9 @@
-/*	Arbib_Lab02.ino
+/*	Arbib_Main.ino
  * 	Author: Rahul Yarlagadda, Ellie Honious
  * 	Date: January 20th, 2018
  *
- * 	This file contains the main loop for Airbib accomplishing the tasks laid out in Lab 3.
- * 	This includes aggressive kid behaviors, shy kid behaviors, random-wander, and go-to-goal
- * 	functionality. Additionally, random-wander and go-to-goal have integrated obstacle avoidance
- * 	and wall follow capabilities.
+ * 	This file contains the main loop for Airbib accomplishing the tasks laid out in the final project.
+ *  It also contains the code to follow topological paths.
  */
 
 #include <TimerOne.h>
@@ -23,11 +21,6 @@ volatile boolean test_state; //variable to hold test led state for timer interru
 
 //flag byte to hold sensor data
 volatile byte flag = 0; // Flag to hold obstacle - used to create the state machine
-
-volatile int robotState;
-#define FOLLOW_WALL		0
-#define DOCKING			1
-#define RETURNING		2
 
 #define STRAIGHT 		0
 #define LEFT			1
@@ -65,25 +58,37 @@ void setup() {
 	Timer1.attachInterrupt(updateSensors); // attaches updateSensors() as a timer overflow interrupt
 	receivedCommand = NULL;
 
-//	parsedCommand = getDirectionsToGoal(0, 0, 3, 0);
-//	Serial.println(parsedCommand);
-//	delay(100);
-//	wirelessSend(parsedCommand);
-//	executeCommands();
-
 	delay(1000);
+
+	//Wander around the world and generate a map.
 	makeMap();
-//	int startPoint = localize();
-//	startX = startPoint/10;
-//	startY = startPoint%10;
-//	wirelessSend("At: (" + String(startX) + "," + String(startY) +")\t");
-//	waitForCommand();
-//	int endPoint = parsedCommand.toInt();
-//	int x = endPoint/10;
-//	int y = endPoint%10;
-//	parsedCommand = getDirectionsToGoal(startX, startY, x, y);
-//	wirelessSend(parsedCommand);
-//	executeCommands();
+
+	//Localize the robot within the world.
+	int startPoint = localize();
+
+	//Parse the (x,y) current location from the robot localizing code.
+	startX = startPoint/10;
+	startY = startPoint%10;
+
+	//Sent the current robot location over the wireles interface.
+	wirelessSend("At: (" + String(startX) + "," + String(startY) +")\t");
+
+	//Do nothing until we get a goal location from the laptop.
+	waitForCommand();
+
+	//Parse the (x,y) goal location from the command sent wirelessly.
+	int endPoint = parsedCommand.toInt();
+	int x = endPoint/10;
+	int y = endPoint%10;
+
+	//Get the topological directions to the goal location.
+	parsedCommand = getDirectionsToGoal(startX, startY, x, y);
+
+	//Send those directions to the laptop.
+	wirelessSend(parsedCommand);
+
+	//Execute the topological directions.
+	executeCommands();
 
 }
 
@@ -91,23 +96,37 @@ void loop() {
 
 }
 
-
+/**
+ * Blocks until a command is reccieved from the wireless interface.
+ */
 void waitForCommand() {
+	//Telll the laptop we are waiting for a command.
 	wirelessSend("WAITING FOR COMMAND");
+
+	//Block unitl we recieve a command.
 	while (receivedCommand == NULL) {
+		//Check once every second.
 		delay(1000);
 		receivedCommand = wirelessRecieve();
+
+		//Convert the recieved command into a string.
 		parsedCommand = String(receivedCommand);
-		Serial.println(parsedCommand);
 	}
 }
 
+/**
+ * Executes a topological path plan.
+ */
 void executeCommands() {
+	//For each letter in the string.
 	for (int i = 0; i < parsedCommand.length(); i++) {
+		//Get the letter.
 		char command = parsedCommand.charAt(i);
+
+		//Move straight, left, or right depending on the letter.
 		switch (command) {
 		case 'S':
-			wirelessSend("-------COMMAND: STRAIGHT----------");
+			//If the last move is straight, just drive foward a bit since there might not be a wall to follow.
 			if (parsedCommand.charAt(i+1) == 'T') {
 				forward(two_rotation);
 			} else {
@@ -115,27 +134,29 @@ void executeCommands() {
 			}
 			break;
 		case 'L':
-			wirelessSend("-------COMMAND: LEFT----------");
 			executeMove(LEFT);
 			break;
 		case 'R':
-			wirelessSend("-------COMMAND: RIGHT----------");
 			executeMove(RIGHT);
 			break;
 		case 'T':
-			wirelessSend("-------COMMAND: STOP----------");
 			executeMove(TERMINATE);
 			return;
 		}
 
 	}
 }
-
+/**
+ * Execute a single topological move.
+ */
 void executeMove(char move) {
 	if (move == -1) {
 		Serial.println("Error: bad move");
 	}
 	boolean successful = false;
+
+	//Keep trying to make the move until it's successful.
+	//This way, if the move is a turn, it will keep driving forward until it can actually turn.
 	while (!successful) {
 		switch (move) {
 		case STRAIGHT:
@@ -155,15 +176,23 @@ void executeMove(char move) {
 	}
 }
 
+/**
+ * Follow a wall until the wall disappears.
+ */
 void followUntilChange() {
+	//Get the current state of left and right obstacles
 	char leftState = bitRead(flag, obLeft);
 	char rightState = bitRead(flag, obRight);
+
+	//Until either of those obstacles change, keep following the wall (or hallway).
 	while ((leftState == bitRead(flag, obLeft)) && (rightState == bitRead(flag, obRight))) {
 		followWall();
 	}
 }
 
-
+/**
+ * Move one cell forward if possible. If it isn't, stop. Return whether the move was successful or not.
+ */
 bool moveForward() {
 	if (bitRead(flag, obFront)) {
 		Serial.print("Tried to move foward, but obstacle. Stopping.");
@@ -176,6 +205,9 @@ bool moveForward() {
 	}
 }
 
+/**
+ * Move one cell left if possible. If it isn't, move forward. Return whether the move was successful or not.
+ */
 bool moveLeft() {
 	if (bitRead(flag, obLeft)) {
 		Serial.print("Tried to move left, but obstacle. Going forward");
@@ -190,6 +222,9 @@ bool moveLeft() {
 	}
 }
 
+/**
+ * Move one cell right if possible. If it isn't, move foward. Return whether the move was successful or not.
+ */
 bool moveRight() {
 	if (bitRead(flag, obRight)) {
 		Serial.print("Tried to move right, but obstacle. Going forward");

@@ -27,14 +27,20 @@ const uint64_t pipe = 0xE8E8F0F0E1LL; //define the radio transmit pipe (5 Byte c
 RF24 radio(PIN_CE, PIN_CSN);          //create radio object
 char command[64];                      //variable to hold transmit data
 
+/**
+ * Setup wireless communication.
+ */
 void wirelessSetup() {
 	radio.begin();                      //start radio
 	radio.setChannel(TEAM_CHANNEL); //set the transmit and receive channels to avoid interference
 	radio.openReadingPipe(1, pipe); //open up reading pipe
-	radio.openWritingPipe(pipe);
-	radio.startListening();			//start listenin	g for data;
+	radio.openWritingPipe(pipe);	//open writing pipe
+	radio.startListening();			//start listening for data;
 }
 
+/**
+ * Recieve a wireless command, if available.
+ */
 char* wirelessRecieve() {
 	if (radio.available()) {
 		radio.read(command, 64);
@@ -43,12 +49,21 @@ char* wirelessRecieve() {
 	return NULL;
 }
 
+/**
+ * Send a string over the wireless interface
+ */
 void wirelessSend(String str) {
-	Serial.println(str);
+	//Convert string to char array
 	char buf[str.length()+1];
 	str.toCharArray(buf, str.length());
 	buf[str.length()] = '\0';
+
+	//Stop listening to put into write mode.
 	radio.stopListening();
+
+	//Send data
 	radio.write(buf, str.length());
+
+	//Start listening again
 	radio.startListening();
 }
