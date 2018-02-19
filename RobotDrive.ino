@@ -55,7 +55,7 @@ void pivot(int rot, int dir) {
 		stepperRight.move(rot);
 	}
 	runToStop();
-	//TODO: Update robot postition variables.
+	//TODO: Update robot position variables.
 }
 
 void spin(int rot) {

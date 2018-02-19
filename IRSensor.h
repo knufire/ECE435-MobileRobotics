@@ -22,7 +22,7 @@ extern float derror; //difference between left and right error to center robot i
 extern volatile byte irFlag;    // Flag to hold IR data - used to create the state machine
 
 /**
- * Updates IR sensors and all assocated data.
+ * Updates IR sensors and all associated data.
  */
 void updateIR();
 

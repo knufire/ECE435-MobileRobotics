@@ -1,7 +1,7 @@
 /**
  * MetricPathPlanning.ino
  * 	Author: Rahul Yarlagadda, Ellie Honious
- * 	Date: Feburary 9th, 2018
+ * 	Date: February 9th, 2018
  *
  * 	This file contains code to create paths between any two points within the world.
  */
@@ -22,7 +22,7 @@ String getDirectionsToGoal(int startX, int startY, int goalX, int goalY) {
 	//Set the starting location to a 1 in the map.
 	world_map[startY][startX] = 1;
 
-	//Use the wavefront algorithim to find the distance from all other cells to the start location.
+	//Use the wavefront algorithm to find the distance from all other cells to the start location.
 	populateMap(startX, startY);
 
 	//Send the map to the laptop.
@@ -75,7 +75,7 @@ bool cellExists(int x, int y) {
 }
 
 /**
- * Recursive function to perform the wavefront algorithim on the map.
+ * Recursive function to perform the wavefront algorithm on the map.
  * Puts the current cells value + 1 to all neighboring cells that haven't already been visited.
  * Then recursively calls the function on all those neighbors.
  */
@@ -123,7 +123,7 @@ void printMap() {
 
 /**
  * Recursive function to find a path from (x,y) to the starting location using results
- * from the wavefront algorithim. Builds the path from (x,y) by always taking the smallest-valued neighbor.
+ * from the wavefront algorithm. Builds the path from (x,y) by always taking the smallest-valued neighbor.
  */
 String getPath(int x, int y) {
 	int smallestValue = world_map[y][x];

@@ -4,7 +4,7 @@
  * 	Date: December 13th, 2017
  *
  * 	This file contains behaviors for following walls and navigating corners. It also maintains it's own internal state
- * 	machine to execute corner manuvers and continue following.
+ * 	machine to execute corner maneuvers and continue following.
  */
 
 #include "WallFollowing.h"
@@ -201,7 +201,7 @@ void setWallState(int newState) {
 }
 
 /**
- * Performs any initalization necessray when changing states.
+ * Performs any initialization necessary when changing states.
  */
 void initNewWallState(int newState) {
 	switch (newState) {

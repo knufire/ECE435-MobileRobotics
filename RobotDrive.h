@@ -36,7 +36,7 @@
 #define CONST_SPIN_DEGREES_TO_STEPS 5.45
 
 /**
- * Contains the initalizaiton routines for the stepper motor drivers and the AccelStepper library.
+ * Contains the initalization routines for the stepper motor drivers and the AccelStepper library.
  * This should be called in the init() function in the main program file.
  */
 void driveSetup();

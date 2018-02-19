@@ -1,10 +1,9 @@
 /**
- * WallFollowing.ino
+ * WirelessReceiver.h
  * 	Author: Rahul Yarlagadda, Ellie Honious
  * 	Date: December 13th, 2017
  *
- * 	This file contains behaviors for following walls and navigating corners. It also maintains it's own internal state
- * 	machine to execute corner manuvers and continue following.
+ * 	This file contains code necessary for receiving data from the laptop.
  */
 #pragma once
 #ifndef WIRELESSRECEIVER_H_

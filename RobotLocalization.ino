@@ -21,16 +21,16 @@ int wall_map[4][4] = { { 11, 15, 15, 11 },
  * Localizes the robot by wandering around the world. Needs a map of the world.
  */
 int localize() {
-	//Add all locations in the world to the list of possibilties.
+	//Add all locations in the world to the list of possibilities.
 	addAllPossibilites();
 
 	//Try to localize
 	while (numPossibilities > 1) {
 
-		//Update the list of possibilites based on the walls at the robot's current location.
+		//Update the list of possibilities based on the walls at the robot's current location.
 		updatePossibilties();
 
-		//If there's 1 or 0 possibities left, stop trying to localize.
+		//If there's 1 or 0 possibilities left, stop trying to localize.
 		if (numPossibilities <= 1) break;
 
 		//Get the obstacles around the robot
@@ -50,7 +50,7 @@ int localize() {
 
 	//---------------DONE LOCALIZING----------
 
-	//Search through all the cells to find the one remaining possibilty.
+	//Search through all the cells to find the one remaining possibility.
 	for (int i = 0; i < n; i++) {
 		if (cells[i].x != -1) {
 			//Reset the robot's orientation north
@@ -61,7 +61,7 @@ int localize() {
 	}
 	//Reset the robot's orientation north
 	turnTo(NORTH);
-	//Return (0,0) since there are no remaining possibilties.
+	//Return (0,0) since there are no remaining possibilities.
 	return 0;
 
 
@@ -79,7 +79,7 @@ void moveNorth() {
 	//Drive forward one cell
 	forward(1360);
 
-	//Move all possibile locations one cell east.
+	//Move all possible locations one cell east.
 	for (int i = 0; i < n; i++) {
 		cells[i].y = cells[i].y - 1;
 	}
@@ -95,7 +95,7 @@ void moveSouth() {
 	turnTo(SOUTH);
 	//Drive forward one cell.
 	forward(1360);
-	//Move all possibile locations one cell east.
+	//Move all possible locations one cell east.
 	for (int i = 0; i < n; i++) {;
 		cells[i].y = cells[i].y + 1;
 	}
@@ -113,7 +113,7 @@ void moveEast() {
 	//Drive forward one cell.
 	forward(1360);
 
-	//Move all possibile locations one cell east.
+	//Move all possible locations one cell east.
 	for (int i = 0; i < n; i++) {
 		cells[i].x = cells[i].x + 1;
 	}
@@ -131,7 +131,7 @@ void moveWest() {
 	//Drive forward one cell.
 	forward(1360);
 
-	//Move all possibile locations one cell west.
+	//Move all possible locations one cell west.
 	for (int i = 0; i < n; i++) {
 		cells[i].x = cells[i].x - 1;
 	}
@@ -215,14 +215,14 @@ void turnTo(int dir) {
 void updatePossibilties() {
 	numPossibilities = 0;
 
-	//Search through the list of possibitlies.
+	//Search through the list of possibilities.
 	for (int i = 0; i < n; i++) {
-		//For this possiblity, get the value of the cell from the world map.
+		//For this possibility, get the value of the cell from the world map.
 		int valueAtCell = wall_map[cells[i].y][cells[i].x];
 
 		//If the value of the robot's current location matches the value from the map
 		if (valueAtCell == getCurrentValue()) {
-			numPossibilities++; //Increase the number of remaining possibities.
+			numPossibilities++; //Increase the number of remaining possibilities.
 		} else { //Otherwise, set the cell to (-1,-1) so we know it's not a possibility anymore.
 			cells[i].x = -1;
 			cells[i].y = -1;
@@ -264,7 +264,7 @@ int getCurrentValue() {
 }
 
 /**
- * Add a cell for every location in the world to the list of possibilties. This needs to be done
+ * Add a cell for every location in the world to the list of possibilities. This needs to be done
  * when the robot starts localizing.
  */
 void addAllPossibilites() {

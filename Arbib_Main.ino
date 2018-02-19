@@ -2,7 +2,7 @@
  * 	Author: Rahul Yarlagadda, Ellie Honious
  * 	Date: January 20th, 2018
  *
- * 	This file contains the main loop for Airbib accomplishing the tasks laid out in the final project.
+ * 	This file contains the main loop for Arbib accomplishing the tasks laid out in the final project.
  *  It also contains the code to follow topological paths.
  */
 
@@ -70,7 +70,7 @@ void setup() {
 	startX = startPoint/10;
 	startY = startPoint%10;
 
-	//Sent the current robot location over the wireles interface.
+	//Sent the current robot location over the wireless interface.
 	wirelessSend("At: (" + String(startX) + "," + String(startY) +")\t");
 
 	//Do nothing until we get a goal location from the laptop.
@@ -97,19 +97,19 @@ void loop() {
 }
 
 /**
- * Blocks until a command is reccieved from the wireless interface.
+ * Blocks until a command is received from the wireless interface.
  */
 void waitForCommand() {
-	//Telll the laptop we are waiting for a command.
+	//Tell the laptop we are waiting for a command.
 	wirelessSend("WAITING FOR COMMAND");
 
-	//Block unitl we recieve a command.
+	//Block until we receive a command.
 	while (receivedCommand == NULL) {
 		//Check once every second.
 		delay(1000);
 		receivedCommand = wirelessRecieve();
 
-		//Convert the recieved command into a string.
+		//Convert the received command into a string.
 		parsedCommand = String(receivedCommand);
 	}
 }
@@ -126,7 +126,7 @@ void executeCommands() {
 		//Move straight, left, or right depending on the letter.
 		switch (command) {
 		case 'S':
-			//If the last move is straight, just drive foward a bit since there might not be a wall to follow.
+			//If the last move is straight, just drive forward a bit since there might not be a wall to follow.
 			if (parsedCommand.charAt(i+1) == 'T') {
 				forward(two_rotation);
 			} else {
@@ -223,7 +223,7 @@ bool moveLeft() {
 }
 
 /**
- * Move one cell right if possible. If it isn't, move foward. Return whether the move was successful or not.
+ * Move one cell right if possible. If it isn't, move forward. Return whether the move was successful or not.
  */
 bool moveRight() {
 	if (bitRead(flag, obRight)) {

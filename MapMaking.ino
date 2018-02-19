@@ -39,7 +39,7 @@ void makeMap() {
 
 /**
  * Check if any of the corners are surrounded by 99s. If they are, set the corner to 99,
- * since we know it's unereachable.
+ * since we know it's unreachable.
  */
 void setUnaccessableLocations() {
 	if (working_map[1][0] == 99 && working_map[0][1] == 99) working_map[0][0] = 99;
@@ -72,7 +72,7 @@ void mapMakingStep() {
 	//Map current cell
 	mapCurrentCell();
 
-	//Find neighbor with lowest priotiy;
+	//Find neighbor with lowest priority;
 	int lowestPriority = 100;
 	int directionToGo = 5;
 	if (getPriority(currX, currY+1) < lowestPriority) {

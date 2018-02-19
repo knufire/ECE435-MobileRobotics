@@ -4,7 +4,7 @@
  * 	Date: December 13th, 2017
  *
  * 	This file contains behaviors for following walls and navigating corners. It also maintains it's own internal state
- * 	machine to execute corner manuvers and continue following.
+ * 	machine to execute corner maneuvers and continue following.
  */
 
 #pragma once
@@ -12,7 +12,7 @@
 #define WALLFOLLOWING_H_
 
 /**
- * State machine varable and states
+ * State machine variable and states
  */
 extern int wallState;   //state to hold robot states and motor motion
 #define AVOID     				0   //avoid behavior
@@ -26,7 +26,7 @@ extern int wallState;   //state to hold robot states and motor motion
 #define LEFT_OUTSIDE_CORNER		8
 
 /**
- * Follows a wall if presesnt, otherwise randomly wanders. Uses blocking drive functions. Directly interfaces with the robot drivetrain.
+ * Follows a wall if present, otherwise randomly wanders. Uses blocking drive functions. Directly interfaces with the robot drive-train.
  */
 void followWall();
 

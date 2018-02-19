@@ -39,7 +39,7 @@ void wirelessSetup() {
 }
 
 /**
- * Recieve a wireless command, if available.
+ * Receive a wireless command, if available.
  */
 char* wirelessRecieve() {
 	if (radio.available()) {
